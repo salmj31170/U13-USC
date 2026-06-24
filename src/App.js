@@ -866,17 +866,33 @@ function Convocations() {
   const toggle = async jid => {
     const cur = convocs.find(c => c.joueur_id === jid && c.categorie === equipe);
     const other = convocs.find(c => c.joueur_id === jid && c.categorie !== equipe);
-    if (cur) { await db.del("convocations", cur.id); setConvocs(p => p.filter(c => c.id !== cur.id)); }
-    else {
-      if (other) { await db.del("convocations", other.id); }
+    
+    if (cur) {
+      // Remove instantly from UI
+      setConvocs(p => p.filter(c => c.id !== cur.id));
+      await db.del("convocations", cur.id);
+    } else {
+      // Add instantly to UI with temp id
+      const tempId = "temp_" + jid;
+      const tempConvoc = { id: tempId, evenement_id: selected.id, joueur_id: jid, categorie: equipe, reponse: null };
+      if (other) {
+        setConvocs(p => [...p.filter(c => c.joueur_id !== jid), tempConvoc]);
+        await db.del("convocations", other.id);
+      } else {
+        setConvocs(p => [...p, tempConvoc]);
+      }
+      // Save to DB and update with real id
       const r = await db.post("convocations", { evenement_id: selected.id, joueur_id: jid, categorie: equipe });
-      if (r?.id) setConvocs(p => [...p.filter(c => c.joueur_id !== jid), r]);
+      if (r?.id) {
+        setConvocs(p => p.map(c => c.id === tempId ? r : c));
+      }
     }
   };
 
   const repondre = async (cid, rep) => {
-    await db.patch("convocations", cid, { reponse: rep });
+    // Update instantly
     setConvocs(p => p.map(c => c.id === cid ? { ...c, reponse: rep } : c));
+    await db.patch("convocations", cid, { reponse: rep });
   };
 
   const repC = { "Présent": T.lime, "Absent": T.red, "Blessé": T.amber, "Malade": T.cyan };
@@ -1516,8 +1532,9 @@ function EspaceParent({ user, onLogout }) {
   }, []);
 
   const repondre = async (cid, rep) => {
-    await db.patch("convocations", cid, { reponse: rep });
+    // Update instantly
     setConvocs(p => p.map(c => c.id === cid ? { ...c, reponse: rep } : c));
+    await db.patch("convocations", cid, { reponse: rep });
   };
 
   const repC = { "Présent": T.lime, "Absent": T.red, "Blessé": T.amber, "Malade": T.cyan };
