@@ -4,14 +4,23 @@ import { useState, useEffect, useCallback, useRef } from "react";
 const SB_URL = "https://kvldromxgcjqqyzavvaw.supabase.co";
 const SB_KEY = "sb_publishable_Y_YuecLpfLS_pTAaUV-qeA_LsxsbHlP";
 
+const getToken = () => {
+  try {
+    const u = localStorage.getItem("u13");
+    if (u) return JSON.parse(u).token || SB_KEY;
+  } catch {}
+  return SB_KEY;
+};
+
 const api = async (method, path, body) => {
+  const token = getToken();
   const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
     method,
     headers: {
-      apikey: SB_KEY,
-      Authorization: `Bearer ${SB_KEY}`,
+      "apikey": SB_KEY,
+      "Authorization": `Bearer ${token}`,
       "Content-Type": "application/json",
-      Prefer: method === "POST" ? "return=representation" : "return=minimal",
+      "Prefer": method === "POST" ? "return=representation" : "return=minimal",
     },
     body: body ? JSON.stringify(body) : undefined,
   });
