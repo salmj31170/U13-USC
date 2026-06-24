@@ -545,11 +545,16 @@ function Joueurs() {
   const save = async () => {
     if (!form.nom.trim() || !form.prenom.trim()) return alert("Nom et prénom obligatoires");
     setSaving(true);
+    // Clean empty date/number fields to avoid Supabase type errors
+    const clean = { ...form };
+    if (!clean.date_naissance) delete clean.date_naissance;
+    if (!clean.taille) delete clean.taille; else clean.taille = parseFloat(clean.taille);
+    if (!clean.poids) delete clean.poids; else clean.poids = parseFloat(clean.poids);
     if (editMode && selected) {
-      await db.patch("joueurs", selected.id, form);
-      setSelected({ ...selected, ...form });
+      await db.patch("joueurs", selected.id, clean);
+      setSelected({ ...selected, ...clean });
     } else {
-      await db.post("joueurs", { ...form, actif: true });
+      await db.post("joueurs", { ...clean, actif: true });
     }
     setShowForm(false); setEditMode(false); setForm(emptyJoueur);
     await load(); setSaving(false);
