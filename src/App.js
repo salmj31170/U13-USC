@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-const SB_URL = "https://jbpzksychvjeiuuhgkpd.supabase.co";
-const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIiA6ICJhbm9uIiwgImlzcyIgOiAic3VwYWJhc2UiLCAiaWF0IiA6IDE3MDAwMDAwMDAsICJleHAiIDogMjAwMDAwMDAwMH0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+const SB_URL = "https://kvldromxgcjqqyzavvaw.supabase.co";
+const SB_KEY = "sb_publishable_Y_YuecLpfLS_pTAaUV-qeA_LsxsbHlP";
 
 const api = async (method, path, body) => {
   const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
@@ -276,17 +276,29 @@ function Login({ onLogin }) {
   const login = async () => {
     if (!email || !pwd) return setErr("Remplissez tous les champs");
     setErr(""); setLoading(true);
-    const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", apikey: SB_KEY },
-      body: JSON.stringify({ email, password: pwd })
-    });
-    const d = await r.json();
-    if (d.access_token) {
-      const u = { role, email, nom: role === "educateur" ? "Coach" : "Parent", token: d.access_token };
-      localStorage.setItem("u13", JSON.stringify(u));
-      onLogin(u);
-    } else setErr("Email ou mot de passe incorrect");
+    try {
+      const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json", 
+          "apikey": SB_KEY,
+          "Authorization": `Bearer ${SB_KEY}`
+        },
+        body: JSON.stringify({ email, password: pwd })
+      });
+      const d = await r.json();
+      if (d.access_token) {
+        const u = { role, email, nom: role === "educateur" ? "Coach" : "Parent", token: d.access_token };
+        localStorage.setItem("u13", JSON.stringify(u));
+        onLogin(u);
+      } else if (d.error_description) {
+        setErr(d.error_description);
+      } else {
+        setErr("Email ou mot de passe incorrect");
+      }
+    } catch(e) {
+      setErr("Erreur de connexion");
+    }
     setLoading(false);
   };
 
