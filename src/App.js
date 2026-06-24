@@ -1086,10 +1086,16 @@ function Blessures() {
 
   const save = async () => {
     if (!form.joueur_id || !form.date_blessure) return;
-    const clean = { ...form };
-    if (!clean.duree_estimee) delete clean.duree_estimee;
-    else clean.duree_estimee = parseInt(clean.duree_estimee);
-    if (!clean.date_reprise_prevue) delete clean.date_reprise_prevue;
+    // Clean all optional fields
+    const clean = {};
+    clean.joueur_id = form.joueur_id;
+    clean.date_blessure = form.date_blessure;
+    clean.statut = form.statut || "en cours";
+    clean.gravite = form.gravite || "Légère";
+    if (form.type_blessure) clean.type_blessure = form.type_blessure;
+    if (form.zone_corps) clean.zone_corps = form.zone_corps;
+    if (form.duree_estimee) clean.duree_estimee = parseInt(form.duree_estimee);
+    if (form.date_reprise_prevue) clean.date_reprise_prevue = form.date_reprise_prevue;
     if (editB) { await db.patch("blessures", editB.id, clean); setEditB(null); }
     else { await db.post("blessures", clean); }
     setShowAdd(false); setForm(ef); load();
