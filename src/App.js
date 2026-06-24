@@ -1205,9 +1205,7 @@ function Bilans() {
       });
       const d = await r.json();
       const txt = d.content?.map(x => x.text || "").join("").trim() || "{}";
-      const clean = txt.replace(/^```json
-?/, "").replace(/
-?```$/, "").trim();
+      const clean = txt.replace(/^```json\n?/, "").replace(/\n?```$/, "").trim();
       const parsed = JSON.parse(clean);
       setForm(p => ({ ...p, ...parsed }));
     } catch (e) {
@@ -1479,8 +1477,12 @@ function Materiel() {
 
   const save = async () => {
     if (!form.nom) return;
-    if (editItem) { await db.patch("materiel", editItem.id, form); setEditItem(null); }
-    else { await db.post("materiel", form); }
+    const clean = { ...form };
+    if (!clean.date_remise) delete clean.date_remise;
+    if (!clean.date_retour) delete clean.date_retour;
+    clean.quantite = parseInt(clean.quantite) || 1;
+    if (editItem) { await db.patch("materiel", editItem.id, clean); setEditItem(null); }
+    else { await db.post("materiel", clean); }
     setShowAdd(false); setForm(ef); load();
   };
 
