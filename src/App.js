@@ -24,10 +24,20 @@ const api = async (method, path, body) => {
     },
     body: body ? JSON.stringify(body) : undefined,
   });
-  if (method === "DELETE") return null;
-  const data = await r.json();
-  if (!r.ok) { console.error(path, data); return null; }
-  return data;
+  if (method === "DELETE" || method === "PATCH") {
+    if (!r.ok) { const t = await r.text(); console.error(path, t); }
+    return null;
+  }
+  const text = await r.text();
+  if (!text) return null;
+  try {
+    const data = JSON.parse(text);
+    if (!r.ok) { console.error(path, data); return null; }
+    return data;
+  } catch(e) {
+    console.error("JSON parse error:", text);
+    return null;
+  }
 };
 
 const db = {
