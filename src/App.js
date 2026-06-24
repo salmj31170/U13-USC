@@ -1550,7 +1550,18 @@ function EspaceParent({ user, onLogout }) {
         db.get("bilans?order=created_at.desc"),
         db.get("convocations?order=created_at.desc")
       ]);
-      setEvents(e || []); setBilans(b || []); setConvocs(c || []); setLoading(false);
+      setEvents(e || []); setBilans(b || []); 
+      // Filter convocations - only show unique ones per event (one per match)
+      const uniqueConvocs = [];
+      const seenEvents = new Set();
+      for (const conv of (c || [])) {
+        if (!seenEvents.has(conv.evenement_id)) {
+          seenEvents.add(conv.evenement_id);
+          uniqueConvocs.push(conv);
+        }
+      }
+      setConvocs(uniqueConvocs); 
+      setLoading(false);
     };
     load();
   }, []);
@@ -1607,25 +1618,35 @@ function EspaceParent({ user, onLogout }) {
           <div>
             <SectionLabel>📋 Mes convocations</SectionLabel>
             {convocs.length === 0 && <Empty icon="📋" title="Aucune convocation" sub="Vous serez notifié dès qu'une convocation arrive" />}
-            {convocs.map(c => (
-              <Card key={c.id}>
+            {convocs.map(c => {
+              const ev = events.find(e => e.id === c.evenement_id);
+              return (
+              <Card key={c.id} style={{ border: c.reponse ? "1px solid " + repC[c.reponse] + "40" : "1px solid " + T.border }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                  <div style={{ fontSize: 24 }}>⚽</div>
-                  <div>
-                    <div style={{ fontWeight: 700, color: T.t1 }}>Convocation — Foot à {c.categorie || "11"}</div>
-                    {c.reponse && <Badge color={repC[c.reponse]} style={{ marginTop: 4 }}>{repI[c.reponse]} {c.reponse}</Badge>}
+                  <div style={{ width: 46, height: 46, borderRadius: 13, background: T.redBg, border: "1px solid " + T.red + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>⚔️</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 800, fontSize: 15, color: T.t1 }}>
+                      {ev ? "vs " + ev.adversaire : "Match"}
+                    </div>
+                    {ev && <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>📅 {ev.date} · ⏰ {ev.heure_debut}</div>}
+                    {ev?.terrain && <div style={{ fontSize: 12, color: T.t3 }}>📍 {ev.terrain}</div>}
+                    <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                      <Badge color={c.categorie === "11" ? T.lime : T.cyan} style={{ fontSize: 10 }}>⚽ Foot à {c.categorie || "11"}</Badge>
+                      {c.reponse && <Badge color={repC[c.reponse]} style={{ fontSize: 10 }}>{repI[c.reponse]} {c.reponse}</Badge>}
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {Object.entries(repC).map(([r, color]) => (
-                    <button key={r} onClick={() => repondre(c.id, r)} style={{ flex: 1, padding: "10px 6px", borderRadius: 12, fontSize: 11, fontWeight: 700, border: `1.5px solid ${c.reponse === r ? color : T.border}`, background: c.reponse === r ? `${color}18` : "transparent", color: c.reponse === r ? color : T.t3, cursor: "pointer", textAlign: "center" }}>
+                    <button key={r} onClick={() => repondre(c.id, r)} style={{ flex: 1, padding: "10px 6px", borderRadius: 12, fontSize: 11, fontWeight: 700, border: "1.5px solid " + (c.reponse === r ? color : T.border), background: c.reponse === r ? color + "18" : "transparent", color: c.reponse === r ? color : T.t3, cursor: "pointer", textAlign: "center" }}>
                       <div style={{ fontSize: 16 }}>{repI[r]}</div>
                       <div style={{ marginTop: 2 }}>{r}</div>
                     </button>
                   ))}
                 </div>
               </Card>
-            ))}
+            );
+            })}
           </div>
         )}
 
