@@ -698,7 +698,7 @@ function Calendrier() {
   const [showAdd, setShowAdd] = useState(false);
   const [editEv, setEditEv] = useState(null);
   const [delModal, setDelModal] = useState(null);
-  const ef = { type: "Entraînement", titre: "", date: "", heure_debut: "18:00", heure_fin: "19:30", terrain: "", adversaire: "", recurrence: "aucune" };
+  const ef = { type: "Entraînement", titre: "", date: "", heure_debut: "18:00", heure_fin: "19:30", terrain: "", adversaire: "", format: "11", recurrence: "aucune" };
   const [form, setForm] = useState(ef);
   const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }));
 
@@ -761,7 +761,7 @@ function Calendrier() {
             <div style={{ width: 46, height: 46, borderRadius: 13, background: `${tColors[e.type] || T.lime}15`, border: `1px solid ${tColors[e.type] || T.lime}25`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>{tIcons[e.type] || "📅"}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                <span style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{e.type === "Match" ? `vs ${e.adversaire}` : e.titre || e.type}</span>
+                <span style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{e.type === "Match" ? `vs ${e.adversaire}${e.format ? " (Foot "+e.format+")" : ""}` : e.titre || e.type}</span>
                 {e.valide && <Badge color={T.lime} style={{ fontSize: 10 }}>✅ Validé</Badge>}
                 {e.recurrence && e.recurrence !== "aucune" && <Badge color={T.cyan} style={{ fontSize: 10 }}>🔄</Badge>}
               </div>
@@ -805,7 +805,18 @@ function Calendrier() {
               ))}
             </div>
           </Field>
-          {form.type === "Match" ? <Input label="Adversaire" value={form.adversaire} onChange={set("adversaire")} placeholder="Nom de l'équipe" /> : <Input label="Titre" value={form.titre} onChange={set("titre")} placeholder="Ex: Séance technique" />}
+          {form.type === "Match" ? (
+            <>
+              <Input label="Adversaire" value={form.adversaire} onChange={set("adversaire")} placeholder="Nom de l'équipe" />
+              <Field label="Format du match">
+                <div style={{ display: "flex", gap: 8 }}>
+                  {[["11", "⚽ Foot à 11"], ["8", "⚽ Foot à 8"]].map(([id, label]) => (
+                    <button key={id} onClick={() => setForm(p => ({ ...p, format: id }))} style={{ flex: 1, padding: "10px", borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: "pointer", border: "1.5px solid " + (form.format === id ? T.lime : T.border), background: form.format === id ? T.limeBg : "transparent", color: form.format === id ? T.lime : T.t3 }}>{label}</button>
+                  ))}
+                </div>
+              </Field>
+            </>
+          ) : <Input label="Titre" value={form.titre} onChange={set("titre")} placeholder="Ex: Séance technique" />}
           <Input label="Date *" type="date" value={form.date} onChange={set("date")} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <Input label="Heure début" type="time" value={form.heure_debut} onChange={set("heure_debut")} />
