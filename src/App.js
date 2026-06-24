@@ -1555,22 +1555,26 @@ function EspaceParent({ user, onLogout }) {
 
   useEffect(() => {
     const load = async () => {
+      const today = new Date().toISOString().split("T")[0];
       const [e, b, c] = await Promise.all([
         db.get("evenements?valide=eq.true&order=date.asc"),
         db.get("bilans?order=created_at.desc"),
         db.get("convocations?order=created_at.desc")
       ]);
-      setEvents(e || []); setBilans(b || []); 
-      // Filter convocations - only show unique ones per event (one per match)
+      const futureEvents = (e || []).filter(ev => ev.date >= today);
+      setEvents(futureEvents);
+      setBilans(b || []);
+      // Only show convocations for future matches, one per event
+      const futureEventIds = new Set(futureEvents.map(ev => ev.id));
       const uniqueConvocs = [];
       const seenEvents = new Set();
       for (const conv of (c || [])) {
-        if (!seenEvents.has(conv.evenement_id)) {
+        if (futureEventIds.has(conv.evenement_id) && !seenEvents.has(conv.evenement_id)) {
           seenEvents.add(conv.evenement_id);
           uniqueConvocs.push(conv);
         }
       }
-      setConvocs(uniqueConvocs); 
+      setConvocs(uniqueConvocs);
       setLoading(false);
     };
     load();
