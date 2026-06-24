@@ -1086,8 +1086,12 @@ function Blessures() {
 
   const save = async () => {
     if (!form.joueur_id || !form.date_blessure) return;
-    if (editB) { await db.patch("blessures", editB.id, form); setEditB(null); }
-    else { await db.post("blessures", form); }
+    const clean = { ...form };
+    if (!clean.duree_estimee) delete clean.duree_estimee;
+    else clean.duree_estimee = parseInt(clean.duree_estimee);
+    if (!clean.date_reprise_prevue) delete clean.date_reprise_prevue;
+    if (editB) { await db.patch("blessures", editB.id, clean); setEditB(null); }
+    else { await db.post("blessures", clean); }
     setShowAdd(false); setForm(ef); load();
   };
 
@@ -1182,14 +1186,28 @@ function Bilans() {
     setGenAI(true);
     try {
       const r = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 800, messages: [{ role: "user", content: `Génère un bilan mensuel bienveillant pour ${j?.prenom} ${j?.nom}, joueur U13, poste: ${j?.poste}. JSON uniquement avec: points_forts, axes_amelioration, comportement, assiduite. 2-3 phrases encourageantes par champ.` }] })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 800,
+          messages: [{
+            role: "user",
+            content: `Tu es un éducateur de football bienveillant. Génère un bilan mensuel pour ${j?.prenom} ${j?.nom}, joueur U13, poste: ${j?.poste}. Réponds UNIQUEMENT avec un objet JSON valide (pas de markdown, pas de backticks) avec exactement ces 4 champs: points_forts, axes_amelioration, comportement, assiduite. 2-3 phrases encourageantes et constructives par champ, adaptées à un enfant de 12-13 ans.`
+          }]
+        })
       });
       const d = await r.json();
-      const txt = d.content?.map(x => x.text || "").join("") || "{}";
-      const parsed = JSON.parse(txt.replace(/```json|```/g, "").trim());
+      const txt = d.content?.map(x => x.text || "").join("").trim() || "{}";
+      const clean = txt.replace(/^```json
+?/, "").replace(/
+?```$/, "").trim();
+      const parsed = JSON.parse(clean);
       setForm(p => ({ ...p, ...parsed }));
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error("AI error:", e);
+      alert("Erreur IA — réessayez");
+    }
     setGenAI(false);
   };
 
