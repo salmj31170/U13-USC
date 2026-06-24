@@ -890,9 +890,14 @@ function Convocations() {
   };
 
   const repondre = async (cid, rep) => {
-    // Update instantly
     setConvocs(p => p.map(c => c.id === cid ? { ...c, reponse: rep } : c));
     await db.patch("convocations", cid, { reponse: rep });
+  };
+
+  const supprimerToutesConvocs = async () => {
+    if (!window.confirm("Supprimer toutes les convocations de ce match ?")) return;
+    for (const c of convocs) { await db.del("convocations", c.id); }
+    setConvocs([]);
   };
 
   const repC = { "Présent": T.lime, "Absent": T.red, "Blessé": T.amber, "Malade": T.cyan };
@@ -903,14 +908,19 @@ function Convocations() {
   if (selected) return (
     <div>
       <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: T.t3, cursor: "pointer", fontSize: 14, marginBottom: 16, display: "flex", alignItems: "center", gap: 6, padding: 0 }}>← Retour</button>
-      <Card style={{ border: `1px solid ${T.red}25` }} glow={T.red}>
+      <Card style={{ border: "1px solid " + T.red + "25" }} glow={T.red}>
         <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, color: T.t1 }}>⚔️ vs {selected.adversaire}</div>
         <div style={{ fontSize: 13, color: T.t3, marginTop: 4 }}>📅 {selected.date} · ⏰ {selected.heure_debut} · 📍 {selected.terrain || "—"}</div>
-        <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+        <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
           <Badge color={T.lime}>⚽ {c11} en Foot 11</Badge>
           <Badge color={T.cyan}>⚽ {c8} en Foot 8</Badge>
           <Badge color={T.t3}>{joueurs.length - convocs.length} non convoqués</Badge>
         </div>
+        {convocs.length > 0 && (
+          <button onClick={supprimerToutesConvocs} style={{ marginTop: 12, width: "100%", padding: "8px", borderRadius: 10, background: T.redBg, border: "1px solid " + T.red + "30", color: T.red, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+            🗑️ Supprimer toutes les convocations de ce match
+          </button>
+        )}
       </Card>
 
       <div style={{ display: "flex", background: T.surface, borderRadius: 12, padding: 4, marginBottom: 14 }}>
@@ -1567,9 +1577,14 @@ function EspaceParent({ user, onLogout }) {
   }, []);
 
   const repondre = async (cid, rep) => {
-    // Update instantly
     setConvocs(p => p.map(c => c.id === cid ? { ...c, reponse: rep } : c));
     await db.patch("convocations", cid, { reponse: rep });
+  };
+
+  const supprimerToutesConvocs = async () => {
+    if (!window.confirm("Supprimer toutes les convocations de ce match ?")) return;
+    for (const c of convocs) { await db.del("convocations", c.id); }
+    setConvocs([]);
   };
 
   const repC = { "Présent": T.lime, "Absent": T.red, "Blessé": T.amber, "Malade": T.cyan };
