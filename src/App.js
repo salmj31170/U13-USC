@@ -1556,22 +1556,28 @@ function EspaceParent({ user, onLogout }) {
   useEffect(() => {
     const load = async () => {
       const today = new Date().toISOString().split("T")[0];
-      const [e, b, c] = await Promise.all([
+      const [eAll, eValides, b, c] = await Promise.all([
+        db.get("evenements?order=date.asc"),
         db.get("evenements?valide=eq.true&order=date.asc"),
         db.get("bilans?order=created_at.desc"),
         db.get("convocations?order=created_at.desc")
       ]);
-      const futureEvents = (e || []).filter(ev => ev.date >= today);
-      setEvents(futureEvents);
+      // Calendar shows only validated future events
+      const futureValidated = (eValides || []).filter(ev => ev.date >= today);
+      setEvents(futureValidated);
       setBilans(b || []);
-      // Only show convocations for future matches, one per event
-      const futureEventIds = new Set(futureEvents.map(ev => ev.id));
+      // For convocations: use ALL events to find names/details
+      // Only show future convocations, one per event
+      const allEvents = eAll || [];
+      const futureEventIds = new Set(allEvents.filter(ev => ev.date >= today).map(ev => ev.id));
       const uniqueConvocs = [];
       const seenEvents = new Set();
       for (const conv of (c || [])) {
         if (futureEventIds.has(conv.evenement_id) && !seenEvents.has(conv.evenement_id)) {
           seenEvents.add(conv.evenement_id);
-          uniqueConvocs.push(conv);
+          // Attach event details directly to convocation
+          const ev = allEvents.find(e => e.id === conv.evenement_id);
+          uniqueConvocs.push({ ...conv, _event: ev });
         }
       }
       setConvocs(uniqueConvocs);
@@ -1638,27 +1644,28 @@ function EspaceParent({ user, onLogout }) {
             <SectionLabel>📋 Mes convocations</SectionLabel>
             {convocs.length === 0 && <Empty icon="📋" title="Aucune convocation" sub="Vous serez notifié dès qu'une convocation arrive" />}
             {convocs.map(c => {
-              const ev = events.find(e => e.id === c.evenement_id);
+              const ev = c._event;
               return (
-              <Card key={c.id} style={{ border: c.reponse ? "1px solid " + repC[c.reponse] + "40" : "1px solid " + T.border }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                  <div style={{ width: 46, height: 46, borderRadius: 13, background: T.redBg, border: "1px solid " + T.red + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>⚔️</div>
+              <Card key={c.id} style={{ border: "1px solid " + (c.reponse ? repC[c.reponse] + "40" : T.border) }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                  <div style={{ width: 46, height: 46, borderRadius: 13, background: T.redBg, border: "1px solid " + T.red + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>⚔️</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 800, fontSize: 15, color: T.t1 }}>
-                      {ev ? "vs " + ev.adversaire : "Match"}
+                    <div style={{ fontWeight: 800, fontSize: 16, color: T.t1 }}>
+                      {ev ? "vs " + ev.adversaire : "Match à venir"}
                     </div>
-                    {ev && <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>📅 {ev.date} · ⏰ {ev.heure_debut}</div>}
+                    {ev && <div style={{ fontSize: 12, color: T.t3, marginTop: 3 }}>📅 {ev.date} · ⏰ {ev.heure_debut}</div>}
                     {ev?.terrain && <div style={{ fontSize: 12, color: T.t3 }}>📍 {ev.terrain}</div>}
-                    <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
-                      <Badge color={c.categorie === "11" ? T.lime : T.cyan} style={{ fontSize: 10 }}>⚽ Foot à {c.categorie || "11"}</Badge>
-                      {c.reponse && <Badge color={repC[c.reponse]} style={{ fontSize: 10 }}>{repI[c.reponse]} {c.reponse}</Badge>}
+                    <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                      <Badge color={c.categorie === "11" ? T.lime : T.cyan}>⚽ Foot à {c.categorie || "11"}</Badge>
+                      {c.reponse && <Badge color={repC[c.reponse]}>{repI[c.reponse]} {c.reponse}</Badge>}
                     </div>
                   </div>
                 </div>
+                <div style={{ marginBottom: 8, fontSize: 12, color: T.t3, fontWeight: 600 }}>VOTRE RÉPONSE :</div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {Object.entries(repC).map(([r, color]) => (
                     <button key={r} onClick={() => repondre(c.id, r)} style={{ flex: 1, padding: "10px 6px", borderRadius: 12, fontSize: 11, fontWeight: 700, border: "1.5px solid " + (c.reponse === r ? color : T.border), background: c.reponse === r ? color + "18" : "transparent", color: c.reponse === r ? color : T.t3, cursor: "pointer", textAlign: "center" }}>
-                      <div style={{ fontSize: 16 }}>{repI[r]}</div>
+                      <div style={{ fontSize: 18 }}>{repI[r]}</div>
                       <div style={{ marginTop: 2 }}>{r}</div>
                     </button>
                   ))}
