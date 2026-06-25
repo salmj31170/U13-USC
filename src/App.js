@@ -84,13 +84,6 @@ const avatarPalette = [T.lime, T.cyan, T.red, T.amber, T.purple, "#FF6B6B", "#4E
 const getAvatarColor = (s) => avatarPalette[(s?.charCodeAt(0) || 0) % avatarPalette.length];
 
 // ─── MICRO COMPONENTS ─────────────────────────────────────────────────────────
- border-radius: 2px; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
-  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-  @keyframes spin { to{transform:rotate(360deg)} }
-";
-
 const Avatar = ({ name = "", size = 40, style }) => {
   const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
   const bg = getAvatarColor(name);
@@ -1765,4 +1758,10 @@ function Terrains() {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [confirmDel, setConfirmDel] = useState(null);
-  const ef = 
+  const ef = { nom: "", adresse: "", surface: "Herbe naturelle", latitude: "", longitude: "" };
+  const [form, setForm] = useState(ef);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const data = await db.get("terrains?order=created_at.desc");
+    setTerrains(data || []); setLoading(fals
