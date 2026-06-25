@@ -771,7 +771,7 @@ function Calendrier() {
           </div>
           <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
             {!e.valide && <Btn size="sm" variant="success" onClick={() => valider(e.id)} style={{ flex: 1 }}>✅ Valider</Btn>}
-            <Btn size="sm" variant="ghost" onClick={() => { setForm({ type: e.type, titre: e.titre || "", date: e.date, heure_debut: e.heure_debut || "18:00", heure_fin: e.heure_fin || "", terrain: e.terrain || "", adversaire: e.adversaire || "", recurrence: e.recurrence || "aucune" }); setEditEv(e); setShowAdd(true); }} style={{ flex: 1 }}>✏️ Modifier</Btn>
+            <Btn size="sm" variant="ghost" onClick={() => { setForm({ type: e.type, titre: e.titre || "", date: e.date, heure_debut: e.heure_debut || "18:00", heure_fin: e.heure_fin || "", terrain: e.terrain || "", adversaire: e.adversaire || "", format: e.format || "11", recurrence: e.recurrence || "aucune" }); setEditEv(e); setShowAdd(true); }} style={{ flex: 1 }}>✏️ Modifier</Btn>
             <Btn size="sm" variant="danger" onClick={() => setDelModal(e)} style={{ flex: 1 }}>🗑️</Btn>
           </div>
         </Card>
@@ -811,7 +811,7 @@ function Calendrier() {
               <Field label="Format du match">
                 <div style={{ display: "flex", gap: 8 }}>
                   {[["11", "⚽ Foot à 11"], ["8", "⚽ Foot à 8"]].map(([id, label]) => (
-                    <button key={id} onClick={() => setForm(p => ({ ...p, format: id }))} style={{ flex: 1, padding: "10px", borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: "pointer", border: "1.5px solid " + (form.format === id ? T.lime : T.border), background: form.format === id ? T.limeBg : "transparent", color: form.format === id ? T.lime : T.t3 }}>{label}</button>
+                    <button key={id} onClick={() => setForm(p => ({ ...p, format: id }))} style={{ flex: 1, padding: "12px", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", border: "1.5px solid " + (form.format === id ? T.lime : T.border), background: form.format === id ? T.limeBg : "transparent", color: form.format === id ? T.lime : T.t3 }}>{label}</button>
                   ))}
                 </div>
               </Field>
