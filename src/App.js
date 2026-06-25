@@ -81,6 +81,19 @@ const postes = ["Gardien", "Défenseur", "Milieu", "Attaquant"];
 const posteIcon = { Gardien: "🧤", Défenseur: "🛡️", Milieu: "⚙️", Attaquant: "⚡" };
 const posteColor = { Gardien: T.amber, Défenseur: T.cyan, Milieu: T.lime, Attaquant: T.red };
 const avatarPalette = [T.lime, T.cyan, T.red, T.amber, T.purple, "#FF6B6B", "#4ECDC4", "#45B7D1"];
+
+const G = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+  *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  body{background:#F0F4F8;color:#0D1B2A;font-family:'Inter',system-ui,sans-serif;overflow-x:hidden}
+  input,button,select,textarea{font-family:inherit}
+  input[type="date"],input[type="time"]{color-scheme:light}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#F0F4F8}::-webkit-scrollbar-thumb{background:#DDE3ED;border-radius:2px}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+`;
+
 const getAvatarColor = (s) => avatarPalette[(s?.charCodeAt(0) || 0) % avatarPalette.length];
 
 // ─── MICRO COMPONENTS ─────────────────────────────────────────────────────────
@@ -317,7 +330,7 @@ function Login({ onLogin }) {
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#003B7A 0%,#1565C0 50%,#F0F4F8 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <style>{globalStyles}</style>
+      <style>{G}</style>
 
       {/* Logo */}
       <div style={{ textAlign: "center", marginBottom: 40 }}>
@@ -1946,7 +1959,7 @@ function EspaceParent({ user, onLogout }) {
 
   return (
     <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: T.bg, minHeight: "100vh", color: T.t1, maxWidth: 430, margin: "0 auto" }}>
-      <style>{globalStyles}</style>
+      <style>{G}</style>
       <div style={{ background: T.surface, borderBottom: "1px solid " + T.border, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 34, height: 34, borderRadius: 10, background: "linear-gradient(135deg," + T.lime + "," + T.limeDim + ")", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>⚽</div>
@@ -2120,7 +2133,7 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: T.bg, minHeight: "100vh", color: T.t1, maxWidth: 430, margin: "0 auto", position: "relative" }}>
-      <style>{globalStyles}</style>
+      <style>{G}</style>
 
       {/* Header */}
       <div style={{ background: T.surface, borderBottom: "1px solid " + T.border, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100 }}>
