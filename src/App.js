@@ -1746,7 +1746,7 @@ function Terrains() {
   return (
     <div>
       <div style={{ background: T.limeBg, border: "1px solid " + T.lime + "20", borderRadius: 12, padding: 12, marginBottom: 14, fontSize: 13, color: T.lime }}>
-        📍 Ajoutez vos terrains pour accéder rapidement à la navigation
+        <span>📍 Ajoutez vos terrains pour accéder rapidement à la navigation</span>
       </div>
       <button style={{ width: "100%", padding: "13px", borderRadius: 14, background: T.lime, color: T.bg, fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer", marginBottom: 16 }} onClick={() => { setForm(ef); setShowAdd(true); }}>+ Ajouter un terrain</button>
-      {confirmDel && <Confirm msg="Supprimer ce terrain ?" onOk={async () => { await db.del("terrains", confirmDel); setConfirmDel(null); load(); }} onCance
+      {confirmDel && <Confirm msg="Supprimer ce terrain ?" onOk={async () => { await db.del("terrains", confirmDel); setConfirmDel(null); load(
