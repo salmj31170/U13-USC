@@ -14,7 +14,7 @@ const getToken = () => {
 
 const api = async (method, path, body) => {
   const token = getToken();
-  const r = await fetch("${SB_URL}/rest/v1/" + path + "", {
+  const r = await fetch(SB_URL + "/rest/v1/" + path, {
     method,
     headers: {
       "apikey": SB_KEY,
@@ -43,10 +43,10 @@ const api = async (method, path, body) => {
 const db = {
   get: (path) => api("GET", path),
   post: (table, data) => api("POST", table, data),
-  patch: (table, id, data) => api("PATCH", "${table}?id=eq." + id + "", data),
-  del: (table, id) => api("DELETE", "${table}?id=eq." + id + ""),
-  delWhere: (table, col, val) => api("DELETE", "${table}?${col}=eq." + encodeURIComponent(val) + ""),
-  delWhereGte: (table, col, val, dateCol, date) => api("DELETE", "${table}?${col}=eq.${encodeURIComponent(val)}&${dateCol}=gte." + date + ""),
+  patch: (table, id, data) => api("PATCH", table + "?id=eq." + id, data),
+  del: (table, id) => api("DELETE", table + "?id=eq." + id),
+  delWhere: (table, col, val) => api("DELETE", table + "?" + col + "=eq." + encodeURIComponent(val)),
+  delWhereGte: (table, col, val, dateCol, date) => api("DELETE", table + "?" + col + "=eq." + encodeURIComponent(val) + "&" + dateCol + "=gte." + date + date + ""),
 };
 
 // ─── DESIGN ───────────────────────────────────────────────────────────────────
@@ -323,7 +323,7 @@ function Login({ onLogin }) {
       <div style={{ textAlign: "center", marginBottom: 40 }}>
         <div style={{
           width: 72, height: 72, borderRadius: 22,
-          background: "linear-gradient(135deg, ${T.lime}, " + T.limeDim + ")",
+          background: "linear-gradient(135deg," + T.lime + "," + T.limeDim + ")",
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 36, margin: "0 auto 16px",
           boxShadow: "0 8px 32px " + T.lime + "30"
@@ -433,7 +433,7 @@ function Dashboard({ joueurs, events }) {
           <SectionLabel>🚑 Blessés</SectionLabel>
           {blesses.map(j => (
             <Card key={j.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <Avatar name={"${j.prenom} " + j.nom + ""} />
+              <Avatar name={j.prenom + " " + j.nom} />
               <div>
                 <div style={{ fontWeight: 700 }}>{j.prenom} {j.nom}</div>
                 <Badge color={T.red} style={{ marginTop: 4 }}>🚑 Indisponible</Badge>
@@ -565,7 +565,7 @@ function Joueurs() {
   };
 
   const filtered = joueurs.filter(j => {
-    const ms = "${j.prenom} " + j.nom + "".toLowerCase().includes(search.toLowerCase());
+    const ms = j.prenom + " " + j.nom.toLowerCase().includes(search.toLowerCase());
     const mp = filterPoste === "Tous" || j.poste === filterPoste;
     return ms && mp;
   });
@@ -574,14 +574,14 @@ function Joueurs() {
     const j = selected;
     return (
       <div>
-        {confirmDel && <Confirm msg={"Archiver ${j.prenom} " + j.nom + " ?"} onOk={archive} onCancel={() => setConfirmDel(false)} />}
+        {confirmDel && <Confirm msg={"Archiver " + j.prenom + " " + j.nom + " ?"} onOk={archive} onCancel={() => setConfirmDel(false)} />}
         {showForm && <JoueurForm form={form} onChange={setForm} onSave={save} saving={saving} editMode={editMode} onClose={() => { setShowForm(false); setEditMode(false); setForm(emptyJoueur); }} />}
 
         <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: T.t3, cursor: "pointer", fontSize: 14, marginBottom: 16, display: "flex", alignItems: "center", gap: 6, padding: 0 }}>← Retour</button>
 
         <Card style={{ background: T.card, border: "1px solid " + getAvatarColor(j.prenom) + "25" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
-            <Avatar name={"${j.prenom} " + j.nom + ""} size={64} />
+            <Avatar name={j.prenom + " " + j.nom} size={64} />
             <div>
               <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 22, fontWeight: 700, color: T.t1 }}>{j.prenom} {j.nom}</div>
               <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
@@ -660,7 +660,7 @@ function Joueurs() {
         {filtered.map(j => (
           <Card key={j.id} style={{ margin: 0, cursor: "pointer" }} onClick={() => setSelected(j)}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-              <Avatar name={"${j.prenom} " + j.nom + ""} size={38} />
+              <Avatar name={j.prenom + " " + j.nom} size={38} />
               <span style={{ fontSize: 18 }}>{posteIcon[j.poste] || "⚽"}</span>
             </div>
             <div style={{ fontWeight: 800, fontSize: 14, color: T.t1 }}>{j.prenom}</div>
@@ -724,7 +724,7 @@ function Calendrier() {
     const e = delModal;
     if (opt === "seul") { await db.del("evenements", e.id); }
     else if (opt === "futurs") {
-      const all = await db.get("evenements?recurrence=eq.${encodeURIComponent(e.recurrence)}&date=gte." + e.date + "");
+      const all = await db.get("evenements?recurrence=eq." + encodeURIComponent(e.recurrence) + "&date=gte." + e.date + "");
       for (const x of (all || [])) await db.del("evenements", x.id);
     } else {
       const all = await db.get("evenements?recurrence=eq." + encodeURIComponent(e.recurrence) + "");
@@ -747,7 +747,7 @@ function Calendrier() {
             <div style={{ width: 46, height: 46, borderRadius: 13, background: "" + tColors[e.type] || T.lime + "15", border: "1px solid " + tColors[e.type] || T.lime + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>{tIcons[e.type] || "📅"}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                <span style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{e.type === "Match" ? "vs ${e.adversaire}" + e.format ? " (Foot "+e.format+")" : "" + "" : e.titre || e.type}</span>
+                <span style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{e.type === "Match" ? "vs " + e.adversaire}" + e.format ? " (Foot "+e.format+")" : "" + "" : e.titre || e.type}</span>
                 {e.valide && <Badge color={T.lime} style={{ fontSize: 10 }}>✅ Validé</Badge>}
                 {e.recurrence && e.recurrence !== "aucune" && <Badge color={T.cyan} style={{ fontSize: 10 }}>🔄</Badge>}
               </div>
@@ -947,7 +947,7 @@ function Convocations() {
         return (
           <Card key={j.id} style={{ border: cc ? "1px solid " + eColor + "40" : "1px solid " + T.border }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: cc ? 10 : 0 }}>
-              <Avatar name={"${j.prenom} " + j.nom + ""} size={38} />
+              <Avatar name={j.prenom + " " + j.nom} size={38} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 14 }}>{j.prenom} {j.nom}</div>
                 <div style={{ fontSize: 12, color: T.t3 }}>{j.poste}</div>
@@ -1049,7 +1049,7 @@ function Statistiques() {
           return (
             <div key={j.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: i < sorted.length - 1 ? 14 : 0 }}>
               <div style={{ width: 28, textAlign: "center", fontWeight: 900, fontSize: 16, color: i < 3 ? color : T.t3 }}>{medals[i] || "" + i + 1 + ""}</div>
-              <Avatar name={"${j.prenom} " + j.nom + ""} size={36} />
+              <Avatar name={j.prenom + " " + j.nom} size={36} />
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
                   <span style={{ fontWeight: 700, fontSize: 13 }}>{j.prenom} {j.nom}</span>
@@ -1135,9 +1135,9 @@ function Blessures() {
         return (
           <Card key={b.id}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              <Avatar name={j ? "${j.prenom} " + j.nom + "" : "?"} size={38} />
+              <Avatar name={j ? j.prenom + " " + j.nom : "?"} size={38} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>{j ? "${j.prenom} " + j.nom + "" : "Joueur"}</div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{j ? j.prenom + " " + j.nom : "Joueur"}</div>
                 <div style={{ fontSize: 12, color: T.t3 }}>📅 {b.date_blessure}</div>
               </div>
               <Badge color={gC[b.gravite] || T.t3}>{b.gravite}</Badge>
@@ -1254,9 +1254,9 @@ function Bilans() {
         return (
           <Card key={b.id}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-              <Avatar name={j ? "${j.prenom} " + j.nom + "" : "?"} size={38} />
+              <Avatar name={j ? j.prenom + " " + j.nom : "?"} size={38} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, fontSize: 15, color: T.t1 }}>{j ? "${j.prenom} " + j.nom + "" : "Joueur"}</div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: T.t1 }}>{j ? j.prenom + " " + j.nom : "Joueur"}</div>
                 <div style={{ fontSize: 12, color: T.t3 }}>📅 {b.mois}</div>
               </div>
             </div>
@@ -1765,4 +1765,4 @@ function Terrains() {
           <Badge color={T.lime} style={{ marginBottom: 12, fontSize: 10 }}>{t.surface}</Badge>
           <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
             <button onClick={() => nav(t, "google")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#4285F422", border: "1px solid #4285F440", color: "#4285F4", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>Google Maps</button>
-            <button onClick={() => nav(t, "waze")} style={{ flex: 1, padding: "9px 6px", borderRadius: 1
+            <button onClick={() => nav(t, "waze")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#00D2FF22", 
