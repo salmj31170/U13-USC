@@ -422,7 +422,7 @@ function Dashboard({ joueurs, events }) {
             <div style={{ fontWeight: 700, fontSize: 14, color: T.t1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {e.type === "Match" ? "⚔️ vs " + e.adversaire + "" : e.titre || e.type}
             </div>
-            <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>📅 {e.date} · ⏰ {e.heure_debut}{e.terrain ? " · 📍 " + e.terrain + "" : ""}</div>
+            <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>{"📅 " + e.date} · ⏰ {e.heure_debut}{e.terrain ? " · 📍 " + e.terrain + "" : ""}</div>
           </div>
           <Badge color={tColors[e.type] || T.lime}>{e.type}</Badge>
         </Card>
@@ -751,7 +751,7 @@ function Calendrier() {
                 {e.valide && <Badge color={T.lime} style={{ fontSize: 10 }}>✅ Validé</Badge>}
                 {e.recurrence && e.recurrence !== "aucune" && <Badge color={T.cyan} style={{ fontSize: 10 }}>🔄</Badge>}
               </div>
-              <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>📅 {e.date} · ⏰ {e.heure_debut}{e.heure_fin ? " – " + e.heure_fin + "" : ""}</div>
+              <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>{"📅 " + e.date} · ⏰ {e.heure_debut}{e.heure_fin ? " – " + e.heure_fin + "" : ""}</div>
               {e.terrain && (
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{ fontSize: 12, color: T.t3 }}>📍 {e.terrain}</div>
@@ -1713,7 +1713,7 @@ function Compositions() {
 }
 
 
-// ─── TERRAINS ─────────────────────────────────────────────────────────────────
+// TERRAINS
 function Terrains() {
   const [terrains, setTerrains] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1725,7 +1725,8 @@ function Terrains() {
   const load = useCallback(async () => {
     setLoading(true);
     const data = await db.get("terrains?order=created_at.desc");
-    setTerrains(data || []); setLoading(false);
+    setTerrains(data || []);
+    setLoading(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -1736,26 +1737,43 @@ function Terrains() {
     if (form.latitude) clean.latitude = parseFloat(form.latitude);
     if (form.longitude) clean.longitude = parseFloat(form.longitude);
     await db.post("terrains", clean);
-    setShowAdd(false); setForm(ef); load();
+    setShowAdd(false);
+    setForm(ef);
+    load();
   };
 
-  const openMaps = (t, app) => {
-    const query = encodeURIComponent(t.adresse || t.nom);
-    const coords = t.latitude && t.longitude ? t.latitude + "," + t.longitude : null;
-    let url;
-    if (app === "google") url = coords ? "https://www.google.com/maps?q=" + coords : "https://www.google.com/maps/search/" + query;
-    else if (app === "waze") url = coords ? "https://waze.com/ul?ll=" + coords + "&navigate=yes" : "https://waze.com/ul?q=" + query;
-    else url = coords ? "https://maps.apple.com/?ll=" + coords : "https://maps.apple.com/?q=" + query;
-    window.open(url, "_blank");
+  const nav = (t, app) => {
+    const q = t.latitude && t.longitude ? t.latitude + "," + t.longitude : encodeURIComponent(t.adresse || t.nom);
+    const urls = {
+      google: "https://www.google.com/maps?q=" + q,
+      waze: "https://waze.com/ul?ll=" + q + "&navigate=yes",
+      apple: "https://maps.apple.com/?q=" + q
+    };
+    window.open(urls[app], "_blank");
   };
 
-  const surfaceColor = { "Herbe naturelle": T.lime, "Synthétique": T.cyan, "Salle": T.amber };
-  const surfaceIcon = { "Herbe naturelle": "🌿", "Synthétique": "🏟️", "Salle": "🏢" };
+  const sC = { "Herbe naturelle": T.lime, "Synthetique": T.cyan, "Salle": T.amber };
+  const sI = { "Herbe naturelle": "Herbe", "Synthetique": "Synth.", "Salle": "Salle" };
 
   return (
     <div>
-      <div style={{ background: T.limeBg, border: "1px solid " + T.lime + "20", borderRadius: 12, padding: 12, marginBottom: 14, fontSize: 13, color: T.lime }}>
-        <span>📍 Ajoutez vos terrains pour accéder rapidement à la navigation</span>
-      </div>
-      <button style={{ width: "100%", padding: "13px", borderRadius: 14, background: T.lime, color: T.bg, fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer", marginBottom: 16 }} onClick={() => { setForm(ef); setShowAdd(true); }}>+ Ajouter un terrain</button>
-      {confirmDel && <Confirm msg="Supprimer ce terrain ?" onOk={async () => { await db.del("terrains", confirmDe
+      <Btn full style={{ marginBottom: 16 }} onClick={() => { setForm(ef); setShowAdd(true); }}>
+        + Ajouter un terrain
+      </Btn>
+      {confirmDel && (
+        <Confirm
+          msg="Supprimer ce terrain ?"
+          onOk={async () => { await db.del("terrains", confirmDel); setConfirmDel(null); load(); }}
+          onCancel={() => setConfirmDel(null)}
+        />
+      )}
+      {loading && <Spinner />}
+      {!loading && terrains.length === 0 && (
+        <Empty icon="📍" title="Aucun terrain" sub="Ajoutez vos terrains" />
+      )}
+      {terrains.map(t => (
+        <Card key={t.id}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <div style={{ width: 46, height: 46, borderRadius: 13, background: (sC[t.surface] || T.lime) + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>
+              {"📍"}
+            </div
