@@ -1599,7 +1599,7 @@ function TerrainSearch({ value, onChange, placeholder }) {
         <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: T.card, border: "1px solid " + T.border, borderRadius: 10, zIndex: 1000, overflow: "hidden", marginTop: 4 }}>
           {suggestions.map((s, i) => (
             <div key={i} onMouseDown={() => select(s)} style={{ padding: "10px 14px", cursor: "pointer", fontSize: 13, color: T.t1, borderBottom: i < suggestions.length-1 ? "1px solid " + T.border : "none" }}>
-              📍 {s.short}
+              {"📍 " + s.short}
             </div>
           ))}
         </div>
@@ -1749,4 +1749,4 @@ function Terrains() {
         <span>📍 Ajoutez vos terrains pour accéder rapidement à la navigation</span>
       </div>
       <button style={{ width: "100%", padding: "13px", borderRadius: 14, background: T.lime, color: T.bg, fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer", marginBottom: 16 }} onClick={() => { setForm(ef); setShowAdd(true); }}>+ Ajouter un terrain</button>
-      {confirmDel && <Confirm msg="Supprimer ce terrain ?" onOk={async () => { await db.del("terrains", confirmDel); setConfirmDel(null); load(
+      {confirmDel && <Confirm msg="Supprimer ce terrain ?" onOk={async () => { await db.del("terrains", confirmDel); setConfirmDel(null); 
