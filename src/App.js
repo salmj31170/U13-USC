@@ -1765,4 +1765,407 @@ function Terrains() {
           <Badge color={T.lime} style={{ marginBottom: 12, fontSize: 10 }}>{t.surface}</Badge>
           <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
             <button onClick={() => nav(t, "google")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#4285F422", border: "1px solid #4285F440", color: "#4285F4", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>Google Maps</button>
-            <button onClick={() => nav(t, "waze")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#00D2FF22", b
+            <button onClick={() => nav(t, "waze")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#00D2FF22", border: "1px solid #00D2FF40", color: "#00D2FF", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>Waze</button>
+            <button onClick={() => nav(t, "apple")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#C8F13518", border: "1px solid #C8F13540", color: T.lime, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>Plans</button>
+          </div>
+          <Btn full size="sm" variant="danger" onClick={() => setConfirmDel(t.id)}>Supprimer</Btn>
+        </Card>
+      ))}
+      {showAdd && (
+        <Drawer title="Ajouter un terrain" onClose={() => { setShowAdd(false); setForm(ef); }}>
+          <Input label="Nom du terrain *" value={form.nom} onChange={e => setForm({ ...form, nom: e.target.value })} placeholder="Ex: Stade Municipal" />
+          <Field label="Adresse">
+            <TerrainSearch value={form.adresse} onChange={(val, lat, lon) => setForm(p => ({ ...p, adresse: val, latitude: lat || p.latitude, longitude: lon || p.longitude }))} placeholder="Tapez l&apos;adresse..." />
+          </Field>
+          <Sel label="Surface" value={form.surface} onChange={e => setForm({ ...form, surface: e.target.value })}>
+            <option>Herbe naturelle</option>
+            <option>Synthetique</option>
+            <option>Salle</option>
+          </Sel>
+          <div style={{ display: "flex", gap: 10 }}>
+            <Btn full variant="ghost" onClick={() => { setShowAdd(false); setForm(ef); }}>Annuler</Btn>
+            <Btn full onClick={save} disabled={!form.nom}>Enregistrer</Btn>
+          </div>
+        </Drawer>
+      )}
+    </div>
+  );
+}
+
+
+function Presences() {
+  const [events, setEvents] = useState([]);
+  const [joueurs, setJoueurs] = useState([]);
+  const [presences, setPresences] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const [e, j, p] = await Promise.all([
+        db.get("evenements?order=date.desc"),
+        db.get("joueurs?actif=eq.true&order=nom.asc"),
+        db.get("presences?order=created_at.desc")
+      ]);
+      setEvents(e || []); setJoueurs(j || []); setPresences(p || []); setLoading(false);
+    };
+    load();
+  }, []);
+
+  const loadPresences = async (eventId) => {
+    const data = await db.get("presences?evenement_id=eq." + eventId);
+    setPresences(data || []);
+  };
+
+  const togglePresence = async (joueurId, present) => {
+    const existing = presences.find(p => p.joueur_id === joueurId);
+    if (existing) {
+      setPresences(prev => prev.map(p => p.joueur_id === joueurId ? { ...p, present } : p));
+      await db.patch("presences", existing.id, { present });
+    } else {
+      const tempId = "temp_" + joueurId;
+      setPresences(prev => [...prev, { id: tempId, evenement_id: selected.id, joueur_id: joueurId, present }]);
+      const r = await db.post("presences", { evenement_id: selected.id, joueur_id: joueurId, present });
+      if (r?.id) setPresences(prev => prev.map(p => p.id === tempId ? r : p));
+    }
+  };
+
+  const getPresence = (joueurId) => presences.find(p => p.joueur_id === joueurId);
+  const presents = presences.filter(p => p.present).length;
+  const absents = presences.filter(p => !p.present).length;
+
+  if (selected) return (
+    <div>
+      <button onClick={() => { setSelected(null); }} style={{ background: "none", border: "none", color: T.t3, cursor: "pointer", fontSize: 14, marginBottom: 16, display: "flex", alignItems: "center", gap: 6, padding: 0 }}>← Retour</button>
+      <Card style={{ marginBottom: 14 }}>
+        <div style={{ fontWeight: 800, fontSize: 15, color: T.t1 }}>{selected.type === "Match" ? "vs " + selected.adversaire : selected.titre || selected.type}</div>
+        <div style={{ fontSize: 12, color: T.t3, marginTop: 4 }}>📅 {selected.date}</div>
+        <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+          <Badge color={T.lime}>✅ {presents} présents</Badge>
+          <Badge color={T.red}>❌ {absents} absents</Badge>
+          <Badge color={T.t3}>{joueurs.length - presents - absents} non renseignés</Badge>
+        </div>
+      </Card>
+      <div style={{ fontSize: 11, fontWeight: 700, color: T.t3, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>Marquer les présences</div>
+      {joueurs.map(j => {
+        const p = getPresence(j.id);
+        return (
+          <div key={j.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, marginBottom: 6, background: T.card, border: "1px solid " + T.border }}>
+            <Avatar name={j.prenom + " " + j.nom} size={34} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 13 }}>{j.prenom} {j.nom}</div>
+              <div style={{ fontSize: 11, color: T.t3 }}>{j.poste}</div>
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={() => togglePresence(j.id, true)} style={{ padding: "7px 12px", borderRadius: 10, fontSize: 13, fontWeight: 700, border: "1.5px solid " + (p?.present === true ? T.lime : T.border), background: p?.present === true ? T.limeBg : "transparent", color: p?.present === true ? T.lime : T.t3, cursor: "pointer" }}>✅</button>
+              <button onClick={() => togglePresence(j.id, false)} style={{ padding: "7px 12px", borderRadius: 10, fontSize: 13, fontWeight: 700, border: "1.5px solid " + (p?.present === false ? T.red : T.border), background: p?.present === false ? T.redBg : "transparent", color: p?.present === false ? T.red : T.t3, cursor: "pointer" }}>❌</button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  return (
+    <div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: T.t3, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>Choisir un événement</div>
+      {loading && <Spinner />}
+      {!loading && events.length === 0 && <Empty icon="📋" title="Aucun événement" sub="Créez des événements dans le calendrier" />}
+      {events.slice(0, 20).map(e => (
+        <Card key={e.id} onClick={() => { setSelected(e); loadPresences(e.id); }} style={{ cursor: "pointer" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: e.type === "Match" ? T.redBg : T.limeBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{e.type === "Match" ? "⚔️" : "🏃"}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{e.type === "Match" ? "vs " + e.adversaire : e.titre || e.type}</div>
+              <div style={{ fontSize: 12, color: T.t3 }}>{"📅 " + e.date}</div>
+            </div>
+            <span style={{ color: T.t3 }}>›</span>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ─── ESPACE PARENT ────────────────────────────────────────────────────────────
+function EspaceParent({ user, onLogout }) {
+  const [tab, setTab] = useState("calendrier");
+  const [events, setEvents] = useState([]);
+  const [bilans, setBilans] = useState([]);
+  const [convocs, setConvocs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const today = new Date().toISOString().split("T")[0];
+      const [eAll, eValides, b, c] = await Promise.all([
+        db.get("evenements?order=date.asc"),
+        db.get("evenements?valide=eq.true&order=date.asc"),
+        db.get("bilans?order=created_at.desc"),
+        db.get("convocations?order=created_at.desc")
+      ]);
+      // Calendar shows only validated future events
+      const futureValidated = (eValides || []).filter(ev => ev.date >= today);
+      setEvents(futureValidated);
+      setBilans(b || []);
+      // For convocations: use ALL events to find names/details
+      // Only show future convocations, one per event
+      const allEvents = eAll || [];
+      const futureEventIds = new Set(allEvents.filter(ev => ev.date >= today).map(ev => ev.id));
+      const uniqueConvocs = [];
+      const seenEvents = new Set();
+      for (const conv of (c || [])) {
+        if (futureEventIds.has(conv.evenement_id) && !seenEvents.has(conv.evenement_id)) {
+          seenEvents.add(conv.evenement_id);
+          // Attach event details directly to convocation
+          const ev = allEvents.find(e => e.id === conv.evenement_id);
+          uniqueConvocs.push({ ...conv, _event: ev });
+        }
+      }
+      setConvocs(uniqueConvocs);
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const repondre = async (cid, rep) => {
+    setConvocs(p => p.map(c => c.id === cid ? { ...c, reponse: rep } : c));
+    await db.patch("convocations", cid, { reponse: rep });
+  };
+
+  const supprimerToutesConvocs = async () => {
+    if (!window.confirm("Supprimer toutes les convocations de ce match ?")) return;
+    for (const c of convocs) { await db.del("convocations", c.id); }
+    setConvocs([]);
+  };
+
+  const repC = { "Présent": T.lime, "Absent": T.red, "Blessé": T.amber, "Malade": T.cyan };
+  const repI = { "Présent": "✅", "Absent": "❌", "Blessé": "🚑", "Malade": "🤒" };
+  const tC = { "Entraînement": T.lime, "Match": T.red, "Tournoi": T.amber, "Réunion": T.cyan };
+  const tI = { "Entraînement": "🏃", "Match": "⚔️", "Tournoi": "🏆", "Réunion": "📋" };
+
+  return (
+    <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: T.bg, minHeight: "100vh", color: T.t1, maxWidth: 430, margin: "0 auto" }}>
+      <style>{globalStyles}</style>
+      <div style={{ background: T.surface, borderBottom: "1px solid " + T.border, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 34, height: 34, borderRadius: 10, background: "linear-gradient(135deg," + T.lime + "," + T.limeDim + ")", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>⚽</div>
+          <div>
+            <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 15, fontWeight: 700, color: T.t1 }}>U13-USC</div>
+            <div style={{ fontSize: 10, color: T.lime, fontWeight: 700, letterSpacing: 1 }}>ESPACE PARENT</div>
+          </div>
+        </div>
+        <Btn size="sm" variant="ghost" onClick={onLogout}>Déco</Btn>
+      </div>
+
+      <div style={{ padding: "16px 16px 100px" }}>
+        {loading && <Spinner />}
+
+        {!loading && tab === "calendrier" && (
+          <div>
+            <SectionLabel>📅 Programme de la saison</SectionLabel>
+            {events.length === 0 && <Empty icon="📅" title="Aucun programme" sub="Le coach n'a pas encore publié le programme" />}
+            {events.map(e => (
+              <Card key={e.id}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 46, height: 46, borderRadius: 13, background: "" + tC[e.type] || T.lime + "15", border: "1px solid " + tC[e.type] || T.lime + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{tI[e.type] || "📅"}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{e.type === "Match" ? "vs " + e.adversaire + "" : e.titre || e.type}</div>
+                    <div style={{ fontSize: 12, color: T.t3 }}>{"📅 " + e.date} · ⏰ {e.heure_debut}</div>
+                    {e.terrain && <div style={{ fontSize: 12, color: T.t3 }}>📍 {e.terrain}</div>}
+                  </div>
+                  <Badge color={tC[e.type] || T.lime}>{e.type}</Badge>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {!loading && tab === "convocations" && (
+          <div>
+            <SectionLabel>📋 Mes convocations</SectionLabel>
+            {convocs.length === 0 && <Empty icon="📋" title="Aucune convocation" sub="Vous serez notifié dès qu'une convocation arrive" />}
+            {convocs.map(c => {
+              const ev = c._event;
+              return (
+              <Card key={c.id} style={{ border: "1px solid " + (c.reponse ? repC[c.reponse] + "40" : T.border) }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                  <div style={{ width: 46, height: 46, borderRadius: 13, background: T.redBg, border: "1px solid " + T.red + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>⚔️</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 800, fontSize: 16, color: T.t1 }}>
+                      {ev ? "vs " + ev.adversaire : "Match à venir"}
+                    </div>
+                    {ev && <div style={{ fontSize: 12, color: T.t3, marginTop: 3 }}>📅 {ev.date} · ⏰ {ev.heure_debut}</div>}
+                    {ev?.terrain && <div style={{ fontSize: 12, color: T.t3 }}>{"📍 " + ev.terrain}</div>}
+                    <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                      <Badge color={c.categorie === "11" ? T.lime : T.cyan}>⚽ Foot à {c.categorie || "11"}</Badge>
+                      {c.reponse && <Badge color={repC[c.reponse]}>{repI[c.reponse]} {c.reponse}</Badge>}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ marginBottom: 8, fontSize: 12, color: T.t3, fontWeight: 600 }}>VOTRE RÉPONSE :</div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {Object.entries(repC).map(([r, color]) => (
+                    <button key={r} onClick={() => repondre(c.id, r)} style={{ flex: 1, padding: "10px 6px", borderRadius: 12, fontSize: 11, fontWeight: 700, border: "1.5px solid " + (c.reponse === r ? color : T.border), background: c.reponse === r ? color + "18" : "transparent", color: c.reponse === r ? color : T.t3, cursor: "pointer", textAlign: "center" }}>
+                      <div style={{ fontSize: 18 }}>{repI[r]}</div>
+                      <div style={{ marginTop: 2 }}>{r}</div>
+                    </button>
+                  ))}
+                </div>
+              </Card>
+            );
+            })}
+          </div>
+        )}
+
+        {!loading && tab === "bilans" && (
+          <div>
+            <SectionLabel>📊 Bilans de mon enfant</SectionLabel>
+            {bilans.length === 0 && <Empty icon="📊" title="Aucun bilan" sub="Les bilans seront disponibles prochainement" />}
+            {bilans.map(b => (
+              <Card key={b.id}>
+                <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, color: T.t1, marginBottom: 4 }}>Bilan — {b.mois}</div>
+                <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+                  {[["Technique", b.note_technique], ["Tactique", b.note_tactique], ["Comportement", b.note_comportement], ["Respect", b.note_respect], ["Assiduité", b.note_assiduite], ["Engagement", b.note_engagement]].map(([k, v]) => (
+                    <div key={k} style={{ textAlign: "center" }}>
+                      <div style={{ fontSize: 20 }}>{v}</div>
+                      <div style={{ fontSize: 9, color: T.t3, fontWeight: 700, letterSpacing: 0.5 }}>{k}</div>
+                    </div>
+                  ))}
+                </div>
+                {b.points_forts && <div style={{ fontSize: 14, color: T.t2, marginBottom: 8, padding: "10px 12px", background: T.limeBg, borderRadius: 10 }}><strong style={{ color: T.lime }}>✅ Points forts : </strong>{b.points_forts}</div>}
+                {b.axes_amelioration && <div style={{ fontSize: 14, color: T.t2, marginBottom: 8, padding: "10px 12px", background: T.amberBg, borderRadius: 10 }}><strong style={{ color: T.amber }}>📈 À améliorer : </strong>{b.axes_amelioration}</div>}
+                {b.comportement && <div style={{ fontSize: 14, color: T.t2, padding: "10px 12px", background: T.cyanBg, borderRadius: 10 }}><strong style={{ color: T.cyan }}>😊 Comportement : </strong>{b.comportement}</div>}
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <nav style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: T.surface, borderTop: "1px solid " + T.border, display: "flex", zIndex: 200, paddingBottom: "env(safe-area-inset-bottom,8px)" }}>
+        {[["calendrier", "📅", "Calendrier"], ["convocations", "📋", "Convocations"], ["bilans", "📊", "Bilans"]].map(([id, icon, label]) => (
+          <button key={id} onClick={() => setTab(id)} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "10px 4px 6px", background: "none", border: "none", cursor: "pointer", color: tab === id ? T.lime : T.t3, transition: "color .15s" }}>
+            <span style={{ fontSize: 22 }}>{icon}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5 }}>{label}</span>
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+}
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+const TABS = [
+  { id: "dashboard", label: "Accueil", icon: "🏠" },
+  { id: "joueurs", label: "Joueurs", icon: "👥" },
+  { id: "calendrier", label: "Agenda", icon: "📅" },
+  { id: "convocations", label: "Convocs", icon: "📋" },
+  { id: "stats", label: "Stats", icon: "📊" },
+];
+
+const MORE = [
+  { id: "blessures", label: "Blessures", icon: "🚑" },
+  { id: "bilans", label: "Bilans", icon: "📈" },
+  { id: "resultats", label: "Résultats", icon: "⚽" },
+  { id: "messages", label: "Messages", icon: "💬" },
+  { id: "materiel", label: "Matériel", icon: "📦" },
+  { id: "compositions", label: "Compo", icon: "🎯" },
+  { id: "terrains", label: "Terrains", icon: "📍" },
+  { id: "presences", label: "Présences", icon: "✅" },
+];
+
+export default function App() {
+  const [user, setUser] = useState(() => {
+    try { const s = localStorage.getItem("u13"); return s ? JSON.parse(s) : null; } catch { return null; }
+  });
+  const [tab, setTab] = useState("dashboard");
+  const [joueurs, setJoueurs] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [showMore, setShowMore] = useState(false);
+
+  const logout = () => { localStorage.removeItem("u13"); setUser(null); };
+
+  useEffect(() => {
+    if (user?.role === "educateur") {
+      Promise.all([
+        db.get("joueurs?actif=eq.true&order=nom.asc"),
+        db.get("evenements?order=date.asc")
+      ]).then(([j, e]) => { setJoueurs(j || []); setEvents(e || []); });
+    }
+  }, [user, tab]);
+
+  if (!user) return <Login onLogin={setUser} />;
+  if (user.role === "parent") return <EspaceParent user={user} onLogout={logout} />;
+
+  const renderPage = () => {
+    switch (tab) {
+      case "dashboard": return <Dashboard joueurs={joueurs} events={events} />;
+      case "joueurs": return <Joueurs />;
+      case "calendrier": return <Calendrier />;
+      case "convocations": return <Convocations />;
+      case "stats": return <Statistiques />;
+      case "blessures": return <Blessures />;
+      case "bilans": return <Bilans />;
+      case "resultats": return <Resultats />;
+      case "messages": return <Messages user={user} />;
+      case "materiel": return <Materiel />;
+      case "compositions": return <Compositions />;
+      case "terrains": return <Terrains />;
+      case "presences": return <Presences />;
+      default: return null;
+    }
+  };
+
+  const cur = [...TABS, ...MORE].find(t => t.id === tab);
+
+  return (
+    <div style={{ fontFamily: "'Inter',system-ui,sans-serif", background: T.bg, minHeight: "100vh", color: T.t1, maxWidth: 430, margin: "0 auto", position: "relative" }}>
+      <style>{globalStyles}</style>
+
+      {/* Header */}
+      <div style={{ background: T.surface, borderBottom: "1px solid " + T.border, padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 34, height: 34, borderRadius: 10, background: "linear-gradient(135deg," + T.lime + "," + T.limeDim + ")", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>⚽</div>
+          <div>
+            <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 15, fontWeight: 700, color: T.t1 }}>U13-USC</div>
+            <div style={{ fontSize: 10, color: T.lime, fontWeight: 700, letterSpacing: 1 }}>{cur?.icon} {cur?.label?.toUpperCase()}</div>
+          </div>
+        </div>
+        <Btn size="sm" variant="ghost" onClick={logout}>Déco</Btn>
+      </div>
+
+      {/* Page */}
+      <div style={{ padding: "16px 16px 110px", overflowY: "auto" }}>
+        {renderPage()}
+      </div>
+
+      {/* Bottom nav */}
+      <nav style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: T.surface, borderTop: "1px solid " + T.border, display: "flex", zIndex: 200, paddingBottom: "env(safe-area-inset-bottom,8px)" }}>
+        {TABS.map(t => (
+          <button key={t.id} onClick={() => { setTab(t.id); setShowMore(false); }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "10px 4px 6px", background: "none", border: "none", cursor: "pointer", color: tab === t.id && !showMore ? T.lime : T.t3, transition: "color .15s" }}>
+            <span style={{ fontSize: 20 }}>{t.icon}</span>
+            <span style={{ fontSize: 10, fontWeight: 700 }}>{t.label}</span>
+          </button>
+        ))}
+        <button onClick={() => setShowMore(!showMore)} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "10px 4px 6px", background: "none", border: "none", cursor: "pointer", color: showMore ? T.lime : T.t3 }}>
+          <span style={{ fontSize: 20 }}>☰</span>
+          <span style={{ fontSize: 10, fontWeight: 700 }}>Plus</span>
+        </button>
+      </nav>
+
+      {/* More menu */}
+      {showMore && (
+        <>
+          <div style={{ position: "fixed", inset: 0, zIndex: 198 }} onClick={() => setShowMore(false)} />
+          <div style={{ position: "fixed", bottom: 64, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, background: T.surface, borderTop: "1px solid " + T.border, zIndex: 199, padding: "12px 16px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {MORE.map(t => (
+              <button key={t.id} onClick={() => { setTab(t.id); setShowMore(false); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "13px", borderRadius: 14, background: tab === t.id ? T.limeBg : T.card, border: "1px solid " + (tab === t.id ? T.lime + "40" : T.border), cursor: "pointer", color: tab === t.id ? T.lime : T.t2, fontWeight: 700, fontSize: 14, transition: "all .15s" }}>
+                <span style={{ fontSize: 22 }}>{t.icon}</span><span style={{ fontSize: 14, fontWeight: 700 }}>{t.label}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
