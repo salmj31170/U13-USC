@@ -579,7 +579,7 @@ function Joueurs() {
 
         <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: T.t3, cursor: "pointer", fontSize: 14, marginBottom: 16, display: "flex", alignItems: "center", gap: 6, padding: 0 }}>← Retour</button>
 
-        <Card style={{ background: "linear-gradient(135deg, ${getAvatarColor(j.prenom)}15 0%, " + T.card + " 60%)", border: "1px solid " + getAvatarColor(j.prenom) + "25" }}>
+        <Card style={{ background: T.card, border: "1px solid " + getAvatarColor(j.prenom) + "25" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
             <Avatar name={"${j.prenom} " + j.nom + ""} size={64} />
             <div>
@@ -945,7 +945,7 @@ function Convocations() {
         const co = convocs.find(c => c.joueur_id === j.id && c.categorie !== equipe);
         const eColor = equipe === "11" ? T.lime : T.cyan;
         return (
-          <Card key={j.id} style={{ border: "1px solid " + cc ? eColor + "40" : T.border + "" }}>
+          <Card key={j.id} style={{ border: cc ? "1px solid " + eColor + "40" : "1px solid " + T.border }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: cc ? 10 : 0 }}>
               <Avatar name={"${j.prenom} " + j.nom + ""} size={38} />
               <div style={{ flex: 1 }}>
@@ -1765,4 +1765,4 @@ function Terrains() {
           <Badge color={T.lime} style={{ marginBottom: 12, fontSize: 10 }}>{t.surface}</Badge>
           <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
             <button onClick={() => nav(t, "google")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#4285F422", border: "1px solid #4285F440", color: "#4285F4", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>Google Maps</button>
-            <button onClick={() => nav(t,
+            <button onClick={() => nav(t, "waze")} style={{ flex: 1, padding: "9px 6px", borderRadius: 1
