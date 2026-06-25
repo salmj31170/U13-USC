@@ -1556,6 +1556,348 @@ function Materiel() {
   );
 }
 
+
+// ─── COMPOSITIONS ─────────────────────────────────────────────────────────────
+function Compositions() {
+  const [joueurs, setJoueurs] = useState([]);
+  const [selected11, setSelected11] = useState([]);
+  const [selected8, setSelected8] = useState([]);
+  const [formation, setFormation] = useState("4-3-3");
+  const [mode, setMode] = useState("11");
+  const [loading, setLoading] = useState(true);
+  const [capitaine, setCapitaine] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const data = await db.get("joueurs?actif=eq.true&order=poste.asc,nom.asc");
+    setJoueurs(data || []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const formations11 = {
+    "4-3-3": [
+      {pos:"GB",x:50,y:90},{pos:"DD",x:15,y:72},{pos:"DC",x:35,y:72},{pos:"DC",x:65,y:72},{pos:"DG",x:85,y:72},
+      {pos:"MD",x:20,y:48},{pos:"MC",x:50,y:45},{pos:"MG",x:80,y:48},
+      {pos:"AD",x:15,y:22},{pos:"AC",x:50,y:16},{pos:"AG",x:85,y:22}
+    ],
+    "4-4-2": [
+      {pos:"GB",x:50,y:90},{pos:"DD",x:15,y:72},{pos:"DC",x:35,y:72},{pos:"DC",x:65,y:72},{pos:"DG",x:85,y:72},
+      {pos:"MD",x:15,y:50},{pos:"MC",x:38,y:50},{pos:"MC",x:62,y:50},{pos:"MG",x:85,y:50},
+      {pos:"AT",x:33,y:22},{pos:"AT",x:67,y:22}
+    ],
+    "3-5-2": [
+      {pos:"GB",x:50,y:90},{pos:"DC",x:25,y:72},{pos:"DC",x:50,y:72},{pos:"DC",x:75,y:72},
+      {pos:"MD",x:10,y:50},{pos:"MC",x:30,y:48},{pos:"MC",x:50,y:45},{pos:"MC",x:70,y:48},{pos:"MG",x:90,y:50},
+      {pos:"AT",x:33,y:22},{pos:"AT",x:67,y:22}
+    ],
+  };
+
+  const formations8 = [
+    {pos:"GB",x:50,y:90},{pos:"DD",x:20,y:70},{pos:"DC",x:50,y:70},{pos:"DG",x:80,y:70},
+    {pos:"MD",x:20,y:46},{pos:"MC",x:50,y:44},{pos:"MG",x:80,y:46},
+    {pos:"AT",x:50,y:18}
+  ];
+
+  const posData = mode === "11" ? (formations11[formation] || formations11["4-3-3"]) : formations8;
+  const selected = mode === "11" ? selected11 : selected8;
+  const setSelected = mode === "11" ? setSelected11 : setSelected8;
+  const maxPlayers = mode === "11" ? 11 : 8;
+
+  const togglePlayer = (j) => {
+    setSelected(prev => {
+      const isIn = prev.find(x => x.id === j.id);
+      if (isIn) return prev.filter(x => x.id !== j.id);
+      if (prev.length >= maxPlayers) return prev;
+      return [...prev, j];
+    });
+  };
+
+  const isSelected = (j) => selected.find(x => x.id === j.id);
+
+  return (
+    <div>
+      <div style={{ display: "flex", background: T.surface, borderRadius: 12, padding: 4, marginBottom: 14 }}>
+        {[["11", "⚽ Foot 11"], ["8", "⚽ Foot 8"]].map(([id, label]) => (
+          <button key={id} onClick={() => setMode(id)} style={{ flex: 1, padding: "10px 8px", borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: "pointer", border: "none", background: mode === id ? T.lime : "transparent", color: mode === id ? T.bg : T.t3 }}>{label}</button>
+        ))}
+      </div>
+
+      {mode === "11" && (
+        <div style={{ display: "flex", gap: 6, marginBottom: 14, overflowX: "auto" }}>
+          {Object.keys(formations11).map(f => (
+            <button key={f} onClick={() => setFormation(f)} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: "pointer", flexShrink: 0, border: "1px solid " + (formation === f ? T.lime : T.border), background: formation === f ? T.limeBg : "transparent", color: formation === f ? T.lime : T.t3 }}>{f}</button>
+          ))}
+        </div>
+      )}
+
+      {/* Terrain SVG */}
+      <div style={{ background: T.card, borderRadius: 16, padding: 12, marginBottom: 14, border: "1px solid " + T.border }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: T.t3 }}>{mode === "11" ? formation : "Foot à 8"}</span>
+          <span style={{ fontSize: 12, color: T.lime, fontWeight: 700 }}>{selected.length}/{maxPlayers} joueurs</span>
+        </div>
+        <svg viewBox="0 0 300 420" style={{ width: "100%", borderRadius: 10 }}>
+          {/* Terrain */}
+          <rect width="300" height="420" fill="#1A5C32" rx="10"/>
+          <rect x="15" y="15" width="270" height="390" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" rx="6"/>
+          <line x1="15" y1="210" x2="285" y2="210" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
+          <circle cx="150" cy="210" r="40" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
+          <circle cx="150" cy="210" r="2" fill="rgba(255,255,255,0.4)"/>
+          <rect x="95" y="15" width="110" height="55" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
+          <rect x="95" y="350" width="110" height="55" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
+          <rect x="120" y="15" width="60" height="25" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
+          <rect x="120" y="380" width="60" height="25" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
+          {/* Bandes */}
+          {[70,140,210,280,350].map(y => (
+            <line key={y} x1="15" y1={y} x2="285" y2={y} stroke="rgba(255,255,255,0.04)" strokeWidth="12"/>
+          ))}
+          {/* Joueurs */}
+          {posData.map((p, i) => {
+            const j = selected[i];
+            const cx = (p.x / 100) * 270 + 15;
+            const cy = (p.y / 100) * 390 + 15;
+            const isCapt = j && capitaine === j.id;
+            return (
+              <g key={i}>
+                <circle cx={cx} cy={cy} r="18" fill={j ? getAvatarColor(j.prenom) : "rgba(255,255,255,0.1)"} stroke={isCapt ? "#FFB020" : "none"} strokeWidth="2.5"/>
+                {j ? (
+                  <>
+                    <text x={cx} y={cy+1} textAnchor="middle" dominantBaseline="middle" fontSize="9" fontWeight="800" fill="#0E1820">{j.prenom[0]}{j.nom[0]}</text>
+                    {isCapt && <text x={cx+14} y={cy-14} fontSize="10">©</text>}
+                  </>
+                ) : (
+                  <text x={cx} y={cy+1} textAnchor="middle" dominantBaseline="middle" fontSize="12" fill="rgba(255,255,255,0.3)">+</text>
+                )}
+                <text x={cx} y={cy+28} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.6)" fontWeight="600">{p.pos}</text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* Sélection joueurs */}
+      <div style={{ fontSize: 11, fontWeight: 700, color: T.t3, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>
+        Sélectionner les joueurs ({selected.length}/{maxPlayers})
+      </div>
+      {loading && <div style={{ textAlign: "center", color: T.t3, padding: 20 }}>⏳ Chargement...</div>}
+      {joueurs.map(j => {
+        const sel = isSelected(j);
+        return (
+          <div key={j.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, marginBottom: 6, background: sel ? T.limeBg : T.card, border: "1px solid " + (sel ? T.lime + "50" : T.border), cursor: "pointer" }} onClick={() => togglePlayer(j)}>
+            <Avatar name={j.prenom + " " + j.nom} size={34} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 13, color: T.t1 }}>{j.prenom} {j.nom}</div>
+              <div style={{ fontSize: 11, color: T.t3 }}>{j.poste}</div>
+            </div>
+            {sel && (
+              <button onClick={e => { e.stopPropagation(); setCapitaine(capitaine === j.id ? null : j.id); }} style={{ padding: "4px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, border: "1px solid " + (capitaine === j.id ? T.amber : T.border), background: capitaine === j.id ? T.amberBg : "transparent", color: capitaine === j.id ? T.amber : T.t3, cursor: "pointer" }}>
+                {capitaine === j.id ? "© Capitaine" : "© Cap."}
+              </button>
+            )}
+            <div style={{ width: 24, height: 24, borderRadius: 6, background: sel ? T.lime : T.border, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: sel ? T.bg : T.t3, fontWeight: 700 }}>
+              {sel ? "✓" : "+"}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
+// ─── TERRAINS ─────────────────────────────────────────────────────────────────
+function Terrains() {
+  const [terrains, setTerrains] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(null);
+  const ef = { nom: "", adresse: "", surface: "Herbe naturelle", latitude: "", longitude: "" };
+  const [form, setForm] = useState(ef);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const data = await db.get("terrains?order=created_at.desc");
+    setTerrains(data || []); setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const save = async () => {
+    if (!form.nom) return;
+    const clean = { nom: form.nom, adresse: form.adresse, surface: form.surface };
+    if (form.latitude) clean.latitude = parseFloat(form.latitude);
+    if (form.longitude) clean.longitude = parseFloat(form.longitude);
+    await db.post("terrains", clean);
+    setShowAdd(false); setForm(ef); load();
+  };
+
+  const openMaps = (t, app) => {
+    const query = encodeURIComponent(t.adresse || t.nom);
+    const coords = t.latitude && t.longitude ? t.latitude + "," + t.longitude : null;
+    let url;
+    if (app === "google") url = coords ? "https://www.google.com/maps?q=" + coords : "https://www.google.com/maps/search/" + query;
+    else if (app === "waze") url = coords ? "https://waze.com/ul?ll=" + coords + "&navigate=yes" : "https://waze.com/ul?q=" + query;
+    else url = coords ? "https://maps.apple.com/?ll=" + coords : "https://maps.apple.com/?q=" + query;
+    window.open(url, "_blank");
+  };
+
+  const surfaceColor = { "Herbe naturelle": T.lime, "Synthétique": T.cyan, "Salle": T.amber };
+  const surfaceIcon = { "Herbe naturelle": "🌿", "Synthétique": "🏟️", "Salle": "🏢" };
+
+  return (
+    <div>
+      <div style={{ background: T.limeBg, border: "1px solid " + T.lime + "20", borderRadius: 12, padding: 12, marginBottom: 14, fontSize: 13, color: T.lime }}>
+        📍 Ajoutez vos terrains pour accéder rapidement à la navigation
+      </div>
+      <button style={{ width: "100%", padding: "13px", borderRadius: 14, background: T.lime, color: T.bg, fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer", marginBottom: 16 }} onClick={() => { setForm(ef); setShowAdd(true); }}>+ Ajouter un terrain</button>
+      {confirmDel && <Confirm msg="Supprimer ce terrain ?" onOk={async () => { await db.del("terrains", confirmDel); setConfirmDel(null); load(); }} onCancel={() => setConfirmDel(null)} />}
+      {loading && <Spinner />}
+      {!loading && terrains.length === 0 && <Empty icon="📍" title="Aucun terrain" sub="Ajoutez vos terrains d'entraînement et de match" />}
+      {terrains.map(t => (
+        <Card key={t.id}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <div style={{ width: 46, height: 46, borderRadius: 13, background: (surfaceColor[t.surface] || T.lime) + "15", border: "1px solid " + (surfaceColor[t.surface] || T.lime) + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{surfaceIcon[t.surface] || "📍"}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 15, color: T.t1 }}>{t.nom}</div>
+              {t.adresse && <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>📍 {t.adresse}</div>}
+              <Badge color={surfaceColor[t.surface] || T.lime} style={{ marginTop: 6, fontSize: 10 }}>{t.surface}</Badge>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+            <button onClick={() => openMaps(t, "google")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#4285F422", border: "1px solid #4285F440", color: "#4285F4", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>🗺️ Google</button>
+            <button onClick={() => openMaps(t, "waze")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#00D2FF22", border: "1px solid #00D2FF40", color: "#00D2FF", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>🚗 Waze</button>
+            <button onClick={() => openMaps(t, "apple")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: T.limeBg, border: "1px solid " + T.lime + "40", color: T.lime, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>🍎 Plans</button>
+          </div>
+          <button onClick={() => setConfirmDel(t.id)} style={{ width: "100%", padding: "8px", borderRadius: 10, background: T.redBg, border: "1px solid " + T.red + "30", color: T.red, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🗑️ Supprimer</button>
+        </Card>
+      ))}
+      {showAdd && (
+        <Drawer title="Ajouter un terrain" onClose={() => { setShowAdd(false); setForm(ef); }}>
+          <Input label="Nom du terrain *" value={form.nom} onChange={e => setForm({ ...form, nom: e.target.value })} placeholder="Ex: Stade Municipal" />
+          <Field label="Adresse 🎤">
+            <div style={{ display: "flex", gap: 8 }}>
+              <input autoComplete="off" style={{ flex: 1, background: T.surface, border: "1px solid " + T.border, borderRadius: 10, padding: "12px 14px", fontSize: 15, color: T.t1, outline: "none" }} value={form.adresse} onChange={e => setForm({ ...form, adresse: e.target.value })} placeholder="Adresse complète" />
+              <MicBtn onResult={t => setForm(p => ({ ...p, adresse: t }))} />
+            </div>
+          </Field>
+          <Sel label="Type de surface" value={form.surface} onChange={e => setForm({ ...form, surface: e.target.value })}>
+            {["Herbe naturelle", "Synthétique", "Salle"].map(s => <option key={s}>{s}</option>)}
+          </Sel>
+          <div style={{ background: T.cyanBg, border: "1px solid " + T.cyan + "20", borderRadius: 10, padding: 10, marginBottom: 14, fontSize: 12, color: T.cyan }}>
+            📌 Coordonnées GPS (optionnel — pour une navigation précise)
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <Input label="Latitude" type="number" value={form.latitude} onChange={e => setForm({ ...form, latitude: e.target.value })} placeholder="Ex: 43.6047" />
+            <Input label="Longitude" type="number" value={form.longitude} onChange={e => setForm({ ...form, longitude: e.target.value })} placeholder="Ex: 1.4442" />
+          </div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <Btn full variant="ghost" onClick={() => { setShowAdd(false); setForm(ef); }}>Annuler</Btn>
+            <Btn full onClick={save} disabled={!form.nom}>✅ Enregistrer</Btn>
+          </div>
+        </Drawer>
+      )}
+    </div>
+  );
+}
+
+
+// ─── PRÉSENCES ────────────────────────────────────────────────────────────────
+function Presences() {
+  const [events, setEvents] = useState([]);
+  const [joueurs, setJoueurs] = useState([]);
+  const [presences, setPresences] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const [e, j, p] = await Promise.all([
+        db.get("evenements?order=date.desc"),
+        db.get("joueurs?actif=eq.true&order=nom.asc"),
+        db.get("presences?order=created_at.desc")
+      ]);
+      setEvents(e || []); setJoueurs(j || []); setPresences(p || []); setLoading(false);
+    };
+    load();
+  }, []);
+
+  const loadPresences = async (eventId) => {
+    const data = await db.get("presences?evenement_id=eq." + eventId);
+    setPresences(data || []);
+  };
+
+  const togglePresence = async (joueurId, present) => {
+    const existing = presences.find(p => p.joueur_id === joueurId);
+    if (existing) {
+      setPresences(prev => prev.map(p => p.joueur_id === joueurId ? { ...p, present } : p));
+      await db.patch("presences", existing.id, { present });
+    } else {
+      const tempId = "temp_" + joueurId;
+      setPresences(prev => [...prev, { id: tempId, evenement_id: selected.id, joueur_id: joueurId, present }]);
+      const r = await db.post("presences", { evenement_id: selected.id, joueur_id: joueurId, present });
+      if (r?.id) setPresences(prev => prev.map(p => p.id === tempId ? r : p));
+    }
+  };
+
+  const getPresence = (joueurId) => presences.find(p => p.joueur_id === joueurId);
+  const presents = presences.filter(p => p.present).length;
+  const absents = presences.filter(p => !p.present).length;
+
+  if (selected) return (
+    <div>
+      <button onClick={() => { setSelected(null); }} style={{ background: "none", border: "none", color: T.t3, cursor: "pointer", fontSize: 14, marginBottom: 16, display: "flex", alignItems: "center", gap: 6, padding: 0 }}>← Retour</button>
+      <Card style={{ marginBottom: 14 }}>
+        <div style={{ fontWeight: 800, fontSize: 15, color: T.t1 }}>{selected.type === "Match" ? "vs " + selected.adversaire : selected.titre || selected.type}</div>
+        <div style={{ fontSize: 12, color: T.t3, marginTop: 4 }}>📅 {selected.date}</div>
+        <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+          <Badge color={T.lime}>✅ {presents} présents</Badge>
+          <Badge color={T.red}>❌ {absents} absents</Badge>
+          <Badge color={T.t3}>{joueurs.length - presents - absents} non renseignés</Badge>
+        </div>
+      </Card>
+      <div style={{ fontSize: 11, fontWeight: 700, color: T.t3, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>Marquer les présences</div>
+      {joueurs.map(j => {
+        const p = getPresence(j.id);
+        return (
+          <div key={j.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, marginBottom: 6, background: T.card, border: "1px solid " + T.border }}>
+            <Avatar name={j.prenom + " " + j.nom} size={34} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 13 }}>{j.prenom} {j.nom}</div>
+              <div style={{ fontSize: 11, color: T.t3 }}>{j.poste}</div>
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={() => togglePresence(j.id, true)} style={{ padding: "7px 12px", borderRadius: 10, fontSize: 13, fontWeight: 700, border: "1.5px solid " + (p?.present === true ? T.lime : T.border), background: p?.present === true ? T.limeBg : "transparent", color: p?.present === true ? T.lime : T.t3, cursor: "pointer" }}>✅</button>
+              <button onClick={() => togglePresence(j.id, false)} style={{ padding: "7px 12px", borderRadius: 10, fontSize: 13, fontWeight: 700, border: "1.5px solid " + (p?.present === false ? T.red : T.border), background: p?.present === false ? T.redBg : "transparent", color: p?.present === false ? T.red : T.t3, cursor: "pointer" }}>❌</button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  return (
+    <div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: T.t3, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>Choisir un événement</div>
+      {loading && <Spinner />}
+      {!loading && events.length === 0 && <Empty icon="📋" title="Aucun événement" sub="Créez des événements dans le calendrier" />}
+      {events.slice(0, 20).map(e => (
+        <Card key={e.id} onClick={() => { setSelected(e); loadPresences(e.id); }} style={{ cursor: "pointer" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: e.type === "Match" ? T.redBg : T.limeBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{e.type === "Match" ? "⚔️" : "🏃"}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{e.type === "Match" ? "vs " + e.adversaire : e.titre || e.type}</div>
+              <div style={{ fontSize: 12, color: T.t3 }}>📅 {e.date}</div>
+            </div>
+            <span style={{ color: T.t3 }}>›</span>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 // ─── ESPACE PARENT ────────────────────────────────────────────────────────────
 function EspaceParent({ user, onLogout }) {
   const [tab, setTab] = useState("calendrier");
@@ -1738,6 +2080,9 @@ const MORE = [
   { id: "resultats", label: "Résultats", icon: "⚽" },
   { id: "messages", label: "Messages", icon: "💬" },
   { id: "materiel", label: "Matériel", icon: "📦" },
+  { id: "compositions", label: "Compo", icon: "🎯" },
+  { id: "terrains", label: "Terrains", icon: "📍" },
+  { id: "presences", label: "Présences", icon: "✅" },
 ];
 
 export default function App() {
@@ -1775,6 +2120,9 @@ export default function App() {
       case "resultats": return <Resultats />;
       case "messages": return <Messages user={user} />;
       case "materiel": return <Materiel />;
+      case "compositions": return <Compositions />;
+      case "terrains": return <Terrains />;
+      case "presences": return <Presences />;
       default: return null;
     }
   };
