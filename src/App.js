@@ -1760,10 +1760,11 @@ function Compositions() {
               <div style={{ fontSize: 11, color: T.t3 }}>{j.poste}</div>
             </div>
             {sel && (
-              <button onClick={e => { e.stopPropagation(); setCapitaine(capitaine === j.id ? null : j.id); }} style={{ padding: "4px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, border: "1px solid " + (capitaine === j.id ? T.amber : T.border), background: capitaine === j.id ? T.amberBg : "transparent", color: capitaine === j.id ? T.amber : T.t3, cursor: "pointer" }}>
-                {capitaine === j.id ? "© Capitaine" : "© Cap."}
-              </button>
+              <button onClick={evt => { evt.stopPropagation(); setCapitaine(capitaine === j.id ? null : j.id); }} style={{ padding: "4px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, border: "1px solid " + (capitaine === j.id ? T.amber : T.border), background: capitaine === j.id ? T.amberBg : "transparent", color: capitaine === j.id ? T.amber : T.t3, cursor: "pointer" }}>{capitaine === j.id ? "Cap ©" : "Cap."}</button>
             )}
             <div style={{ width: 24, height: 24, borderRadius: 6, background: sel ? T.lime : T.border, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: sel ? T.bg : T.t3, fontWeight: 700 }}>
               {sel ? "✓" : "+"}
             </div>
+          </div>
+        );
+      })
