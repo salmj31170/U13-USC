@@ -1753,7 +1753,7 @@ function Terrains() {
   };
 
   const sC = { "Herbe naturelle": T.lime, "Synthetique": T.cyan, "Salle": T.amber };
-  const sI = { "Herbe naturelle": "Herbe", "Synthetique": "Synth.", "Salle": "Salle" };
+  // surface icons removed
 
   return (
     <div>
@@ -1774,7 +1774,8 @@ function Terrains() {
       {terrains.map(t => (
         <Card key={t.id}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 13, background: (sC[t.surface] || T.lime) + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>
+            <div style={{ width: 46, height: 46, borderRadius: 13, background: T.lime + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>
               {"📍"}
             </div>
-    
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, f
