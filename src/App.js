@@ -1566,11 +1566,16 @@ function TerrainSearch({ value, onChange, placeholder }) {
   const search = async (q) => {
     if (q.length < 3) { setSuggestions([]); return; }
     try {
-      const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&q=" + encodeURIComponent(q) + "&limit=5&countrycodes=fr", {
-        headers: { "Accept-Language": "fr" }
-      });
+      const r = await fetch(
+        "https://nominatim.openstreetmap.org/search?format=json&q=" + encodeURIComponent(q) + "&limit=5&countrycodes=fr",
+        { headers: { "Accept-Language": "fr" } }
+      );
       const data = await r.json();
-      setSuggestions(data.map(d => ({ label: d.display_name, short: d.display_name.split(",").slice(0,3).join(","), lat: d.lat, lon: d.lon })));
+      setSuggestions(data.map(d => ({
+        short: d.display_name.split(",").slice(0, 3).join(","),
+        lat: d.lat,
+        lon: d.lon
+      })));
       setShow(true);
     } catch(e) { setSuggestions([]); }
   };
@@ -1583,22 +1588,25 @@ function TerrainSearch({ value, onChange, placeholder }) {
 
   const select = (s) => {
     onChange(s.short, s.lat, s.lon);
-    setSuggestions([]); setShow(false);
+    setSuggestions([]);
+    setShow(false);
   };
 
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative", flex: 1 }}>
       <input
         autoComplete="off" autoCorrect="off"
-        style={{ width: "100%", background: T.surface, border: "1px solid " + T.border, borderRadius: 10, padding: "12px 14px", fontSize: 15, color: T.t1, outline: "none", boxSizing: "border-box" }}
-        value={value} onChange={handleChange} placeholder={placeholder || "Rechercher un terrain..."}
+        style={{ width: "100%", background: "#F8FAFC", border: "1px solid " + T.border, borderRadius: 10, padding: "12px 14px", fontSize: 15, color: T.t1, outline: "none" }}
+        value={value}
+        onChange={handleChange}
+        placeholder={placeholder || "Rechercher un terrain..."}
         onFocus={() => suggestions.length > 0 && setShow(true)}
         onBlur={() => setTimeout(() => setShow(false), 200)}
       />
       {show && suggestions.length > 0 && (
         <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: T.card, border: "1px solid " + T.border, borderRadius: 10, zIndex: 1000, overflow: "hidden", marginTop: 4 }}>
           {suggestions.map((s, i) => (
-            <div key={i} onMouseDown={() => select(s)} style={{ padding: "10px 14px", cursor: "pointer", fontSize: 13, color: T.t1, borderBottom: i < suggestions.length-1 ? "1px solid " + T.border : "none" }}>
+            <div key={i} onMouseDown={() => select(s)} style={{ padding: "10px 14px", cursor: "pointer", fontSize: 13, color: T.t1, borderBottom: i < suggestions.length - 1 ? "1px solid " + T.border : "none" }}>
               {"📍 " + s.short}
             </div>
           ))}
@@ -1607,6 +1615,7 @@ function TerrainSearch({ value, onChange, placeholder }) {
     </div>
   );
 }
+
 
 // COMPOSITIONS
 function Compositions() {
@@ -1749,4 +1758,4 @@ function Terrains() {
         <span>📍 Ajoutez vos terrains pour accéder rapidement à la navigation</span>
       </div>
       <button style={{ width: "100%", padding: "13px", borderRadius: 14, background: T.lime, color: T.bg, fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer", marginBottom: 16 }} onClick={() => { setForm(ef); setShowAdd(true); }}>+ Ajouter un terrain</button>
-      {confirmDel && <Confirm msg="Supprimer ce terrain ?" onOk={async () => { await db.del("terrains", confirmDel); setConfirmDel(null); 
+      {confirmDel && <Confirm msg="Supprimer ce terrain ?" onOk={async () => { await db.del("terrains", confirmDe
