@@ -747,7 +747,7 @@ function Calendrier() {
             <div style={{ width: 46, height: 46, borderRadius: 13, background: "" + tColors[e.type] || T.lime + "15", border: "1px solid " + tColors[e.type] || T.lime + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>{tIcons[e.type] || "📅"}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                <span style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{e.type === "Match" ? "vs " + e.adversaire}" + e.format ? " (Foot "+e.format+")" : "" + "" : e.titre || e.type}</span>
+                <span style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{e.type === "Match" ? "vs " + e.adversaire + (e.format ? " (Foot " + e.format + ")" : "") : e.titre || e.type}</span>
                 {e.valide && <Badge color={T.lime} style={{ fontSize: 10 }}>✅ Validé</Badge>}
                 {e.recurrence && e.recurrence !== "aucune" && <Badge color={T.cyan} style={{ fontSize: 10 }}>🔄</Badge>}
               </div>
@@ -1765,4 +1765,4 @@ function Terrains() {
           <Badge color={T.lime} style={{ marginBottom: 12, fontSize: 10 }}>{t.surface}</Badge>
           <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
             <button onClick={() => nav(t, "google")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#4285F422", border: "1px solid #4285F440", color: "#4285F4", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>Google Maps</button>
-            <button onClick={() => nav(t, "waze")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#00D2FF22", 
+            <button onClick={() => nav(t, "waze")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#00D2FF22", b
