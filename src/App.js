@@ -14,11 +14,11 @@ const getToken = () => {
 
 const api = async (method, path, body) => {
   const token = getToken();
-  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+  const r = await fetch("${SB_URL}/rest/v1/" + path + "", {
     method,
     headers: {
       "apikey": SB_KEY,
-      "Authorization": `Bearer ${token}`,
+      "Authorization": "Bearer " + token + "",
       "Content-Type": "application/json",
       "Prefer": method === "POST" ? "return=representation" : "return=minimal",
     },
@@ -43,10 +43,10 @@ const api = async (method, path, body) => {
 const db = {
   get: (path) => api("GET", path),
   post: (table, data) => api("POST", table, data),
-  patch: (table, id, data) => api("PATCH", `${table}?id=eq.${id}`, data),
-  del: (table, id) => api("DELETE", `${table}?id=eq.${id}`),
-  delWhere: (table, col, val) => api("DELETE", `${table}?${col}=eq.${encodeURIComponent(val)}`),
-  delWhereGte: (table, col, val, dateCol, date) => api("DELETE", `${table}?${col}=eq.${encodeURIComponent(val)}&${dateCol}=gte.${date}`),
+  patch: (table, id, data) => api("PATCH", "${table}?id=eq." + id + "", data),
+  del: (table, id) => api("DELETE", "${table}?id=eq." + id + ""),
+  delWhere: (table, col, val) => api("DELETE", "${table}?${col}=eq." + encodeURIComponent(val) + ""),
+  delWhereGte: (table, col, val, dateCol, date) => api("DELETE", "${table}?${col}=eq.${encodeURIComponent(val)}&${dateCol}=gte." + date + ""),
 };
 
 // ─── DESIGN ───────────────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ const getAvatarColor = (s) => avatarPalette[(s?.charCodeAt(0) || 0) % avatarPale
 // ─── MICRO COMPONENTS ─────────────────────────────────────────────────────────
 const css = String.raw;
 
-const globalStyles = css`
+const globalStyles = css"
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
   body { background: ${T.bg}; color: ${T.t1}; font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; }
@@ -94,12 +94,12 @@ const globalStyles = css`
   input[type="date"], input[type="time"] { color-scheme: dark; }
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: ${T.surface}; }
-  ::-webkit-scrollbar-thumb { background: ${T.border}; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb { background: " + T.border + "; border-radius: 2px; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
   @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
   @keyframes spin { to{transform:rotate(360deg)} }
-`;
+";
 
 const Avatar = ({ name = "", size = 40, style }) => {
   const initials = name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
@@ -107,7 +107,7 @@ const Avatar = ({ name = "", size = 40, style }) => {
   return (
     <div style={{
       width: size, height: size, borderRadius: size * 0.28,
-      background: `linear-gradient(135deg, ${bg}, ${bg}88)`,
+      background: "linear-gradient(135deg, ${bg}, " + bg + "88)",
       display: "flex", alignItems: "center", justifyContent: "center",
       fontSize: size * 0.36, fontWeight: 800, color: T.bg,
       flexShrink: 0, letterSpacing: -0.5, ...style
@@ -120,18 +120,18 @@ const Badge = ({ children, color = T.lime, style }) => (
     display: "inline-flex", alignItems: "center", gap: 4,
     padding: "3px 10px", borderRadius: 20,
     fontSize: 11, fontWeight: 700, letterSpacing: 0.3,
-    color, background: `${color}18`, border: `1px solid ${color}30`,
+    color, background: "" + color + "18", border: "1px solid " + color + "30",
     ...style
   }}>{children}</span>
 );
 
 const Card = ({ children, style, onClick, glow }) => (
   <div onClick={onClick} style={{
-    background: T.card, border: `1px solid ${T.border}`,
+    background: T.card, border: "1px solid " + T.border,
     borderRadius: 16, padding: 16, marginBottom: 10,
     cursor: onClick ? "pointer" : "default",
     transition: "all .15s",
-    boxShadow: glow ? `0 0 20px ${glow}18` : "none",
+    boxShadow: glow ? "0 0 20px " + glow + "18" : "none",
     ...style
   }}>{children}</div>
 );
@@ -142,9 +142,9 @@ const Btn = ({ children, onClick, variant = "primary", size = "md", style, disab
   const variants = {
     primary: { bg: T.lime, color: T.bg, border: "none" },
     secondary: { bg: T.border, color: T.t1, border: "none" },
-    ghost: { bg: "transparent", color: T.t2, border: `1px solid ${T.border}` },
-    danger: { bg: T.redBg, color: T.red, border: `1px solid ${T.red}30` },
-    success: { bg: T.limeBg, color: T.lime, border: `1px solid ${T.lime}30` },
+    ghost: { bg: "transparent", color: T.t2, border: "1px solid " + T.border },
+    danger: { bg: T.redBg, color: T.red, border: "1px solid " + T.red + "30" },
+    success: { bg: T.limeBg, color: T.lime, border: "1px solid " + T.lime + "30" },
   };
   const v = variants[variant] || variants.primary;
   return (
@@ -172,7 +172,7 @@ const Field = ({ label, children }) => (
 const Input = ({ label, ...props }) => (
   <Field label={label}>
     <input style={{
-      width: "100%", background: T.surface, border: `1px solid ${T.border}`,
+      width: "100%", background: T.surface, border: "1px solid " + T.border,
       borderRadius: 10, padding: "12px 14px", fontSize: 15, color: T.t1,
       outline: "none", transition: "border .15s",
     }}
@@ -186,7 +186,7 @@ const Input = ({ label, ...props }) => (
 const Sel = ({ label, children, ...props }) => (
   <Field label={label}>
     <select style={{
-      width: "100%", background: T.surface, border: `1px solid ${T.border}`,
+      width: "100%", background: T.surface, border: "1px solid " + T.border,
       borderRadius: 10, padding: "12px 14px", fontSize: 15, color: T.t1,
       outline: "none", colorScheme: "dark",
     }} {...props}>{children}</select>
@@ -201,7 +201,7 @@ const TA = ({ label, voice, onVoice, ...props }) => (
       </div>
     )}
     <textarea autoComplete="off" autoCorrect="off" style={{
-      width: "100%", background: T.surface, border: `1px solid ${T.border}`,
+      width: "100%", background: T.surface, border: "1px solid " + T.border,
       borderRadius: 10, padding: "12px 14px", fontSize: 14, color: T.t1,
       outline: "none", minHeight: 80, resize: "vertical", lineHeight: 1.5,
     }} {...props} />
@@ -223,7 +223,7 @@ const MicBtn = ({ onResult, style }) => {
     <button onClick={go} title="Commande vocale" style={{
       width: 36, height: 36, borderRadius: 10, flexShrink: 0,
       background: on ? T.redBg : T.surface,
-      border: `1px solid ${on ? T.red : T.border}`,
+      border: "1px solid " + on ? T.red : T.border + "",
       cursor: "pointer", fontSize: 16,
       display: "flex", alignItems: "center", justifyContent: "center",
       animation: on ? "pulse 1s infinite" : "none", ...style
@@ -240,7 +240,7 @@ const Drawer = ({ title, onClose, children }) => (
       background: T.card, borderRadius: "20px 20px 0 0",
       padding: 20, width: "100%", maxWidth: 430,
       maxHeight: "92vh", overflowY: "auto",
-      border: `1px solid ${T.border}`, borderBottom: "none",
+      border: "1px solid " + T.border, borderBottom: "none",
       animation: "slideUp .2s ease",
     }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
@@ -254,7 +254,7 @@ const Drawer = ({ title, onClose, children }) => (
 
 const Confirm = ({ msg, onOk, onCancel }) => (
   <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", zIndex: 600, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-    <div style={{ background: T.card, borderRadius: 18, padding: 24, width: "100%", maxWidth: 340, border: `1px solid ${T.border}` }}>
+    <div style={{ background: T.card, borderRadius: 18, padding: 24, width: "100%", maxWidth: 340, border: "1px solid " + T.border }}>
       <div style={{ fontSize: 15, color: T.t1, marginBottom: 20, textAlign: "center", lineHeight: 1.5 }}>{msg}</div>
       <div style={{ display: "flex", gap: 10 }}>
         <Btn full variant="ghost" onClick={onCancel}>Annuler</Btn>
@@ -278,7 +278,7 @@ const SectionLabel = ({ children }) => (
 
 const Spinner = () => (
   <div style={{ display: "flex", justifyContent: "center", padding: 40 }}>
-    <div style={{ width: 28, height: 28, border: `3px solid ${T.border}`, borderTopColor: T.lime, borderRadius: "50%", animation: "spin .7s linear infinite" }} />
+    <div style={{ width: 28, height: 28, border: "3px solid " + T.border + "", borderTopColor: T.lime, borderRadius: "50%", animation: "spin .7s linear infinite" }} />
   </div>
 );
 
@@ -296,12 +296,12 @@ function Login({ onLogin }) {
     if (!email || !pwd) return setErr("Remplissez tous les champs");
     setErr(""); setLoading(true);
     try {
-      const r = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+      const r = await fetch("" + SB_URL + "/auth/v1/token?grant_type=password", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
           "apikey": SB_KEY,
-          "Authorization": `Bearer ${SB_KEY}`
+          "Authorization": "Bearer " + SB_KEY + ""
         },
         body: JSON.stringify({ email, password: pwd })
       });
@@ -324,7 +324,7 @@ function Login({ onLogin }) {
   const sendReset = async () => {
     if (!email) return setErr("Entrez votre email");
     setLoading(true);
-    await fetch(`${SB_URL}/auth/v1/recover`, {
+    await fetch("" + SB_URL + "/auth/v1/recover", {
       method: "POST",
       headers: { "Content-Type": "application/json", apikey: SB_KEY },
       body: JSON.stringify({ email })
@@ -340,10 +340,10 @@ function Login({ onLogin }) {
       <div style={{ textAlign: "center", marginBottom: 40 }}>
         <div style={{
           width: 72, height: 72, borderRadius: 22,
-          background: `linear-gradient(135deg, ${T.lime}, ${T.limeDim})`,
+          background: "linear-gradient(135deg, ${T.lime}, " + T.limeDim + ")",
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 36, margin: "0 auto 16px",
-          boxShadow: `0 8px 32px ${T.lime}30`
+          boxShadow: "0 8px 32px " + T.lime + "30"
         }}>⚽</div>
         <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 26, fontWeight: 700, color: T.t1, letterSpacing: -0.5 }}>U13-USC</div>
         <div style={{ fontSize: 13, color: T.t3, marginTop: 4 }}>USC Colomiers · U13</div>
@@ -351,10 +351,10 @@ function Login({ onLogin }) {
 
       <div style={{ width: "100%", maxWidth: 380 }}>
         {reset ? (
-          <div style={{ background: T.card, borderRadius: 18, padding: 24, border: `1px solid ${T.border}` }}>
+          <div style={{ background: T.card, borderRadius: 18, padding: 24, border: "1px solid " + T.border }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: T.t1, marginBottom: 16 }}>🔑 Mot de passe oublié</div>
             {resetDone ? (
-              <div style={{ background: T.limeBg, border: `1px solid ${T.lime}30`, borderRadius: 10, padding: 14, color: T.lime, fontSize: 14, fontWeight: 600 }}>✅ Email envoyé ! Vérifiez votre boîte.</div>
+              <div style={{ background: T.limeBg, border: "1px solid " + T.lime + "30", borderRadius: 10, padding: 14, color: T.lime, fontSize: 14, fontWeight: 600 }}>✅ Email envoyé ! Vérifiez votre boîte.</div>
             ) : (
               <>
                 <Input label="Votre email" type="email" placeholder="votre@email.com" value={email} onChange={e => setEmail(e.target.value)} />
@@ -365,7 +365,7 @@ function Login({ onLogin }) {
             <button onClick={() => { setReset(false); setErr(""); setResetDone(false); }} style={{ background: "none", border: "none", color: T.t3, cursor: "pointer", marginTop: 14, fontSize: 13, width: "100%", textAlign: "center" }}>← Retour</button>
           </div>
         ) : (
-          <div style={{ background: T.card, borderRadius: 18, padding: 24, border: `1px solid ${T.border}` }}>
+          <div style={{ background: T.card, borderRadius: 18, padding: 24, border: "1px solid " + T.border }}>
             {/* Role switcher */}
             <div style={{ display: "flex", background: T.surface, borderRadius: 12, padding: 4, marginBottom: 20 }}>
               {[["educateur", "👨‍🏫 Éducateur"], ["parent", "👨‍👩‍👧 Parent"]].map(([r, l]) => (
@@ -401,14 +401,14 @@ function Dashboard({ joueurs, events }) {
     <div>
       {/* Hero stats */}
       <div style={{
-        background: `linear-gradient(135deg, ${T.surface} 0%, #0A1520 100%)`,
+        background: "linear-gradient(135deg, " + T.surface + " 0%, #0A1520 100%)",
         borderRadius: 18, padding: 20, marginBottom: 14,
-        border: `1px solid ${T.border}`,
+        border: "1px solid " + T.border,
         position: "relative", overflow: "hidden"
       }}>
         {/* Pitch lines decoration */}
-        <div style={{ position: "absolute", right: -20, top: -20, width: 120, height: 120, border: `2px solid ${T.lime}18`, borderRadius: "50%" }} />
-        <div style={{ position: "absolute", right: 20, top: 20, width: 60, height: 60, border: `1px solid ${T.lime}10`, borderRadius: "50%" }} />
+        <div style={{ position: "absolute", right: -20, top: -20, width: 120, height: 120, border: "2px solid " + T.lime + "18", borderRadius: "50%" }} />
+        <div style={{ position: "absolute", right: 20, top: 20, width: 60, height: 60, border: "1px solid " + T.lime + "10", borderRadius: "50%" }} />
         <div style={{ fontSize: 11, fontWeight: 700, color: T.lime, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>🔵 Saison 2025–2026</div>
         <div style={{ display: "flex", gap: 0 }}>
           {[
@@ -416,7 +416,7 @@ function Dashboard({ joueurs, events }) {
             { v: blesses.length, l: "Blessés", c: T.red },
             { v: joueurs.length, l: "Effectif", c: T.cyan },
           ].map((s, i) => (
-            <div key={i} style={{ flex: 1, textAlign: "center", borderRight: i < 2 ? `1px solid ${T.border}` : "none" }}>
+            <div key={i} style={{ flex: 1, textAlign: "center", borderRight: i < 2 ? "1px solid " + T.border : "none" }}>
               <div style={{ fontSize: 34, fontWeight: 900, color: s.c, fontFamily: "'Space Grotesk', sans-serif", lineHeight: 1 }}>{s.v}</div>
               <div style={{ fontSize: 11, color: T.t3, fontWeight: 600, marginTop: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.l}</div>
             </div>
@@ -431,15 +431,15 @@ function Dashboard({ joueurs, events }) {
         <Card key={e.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div style={{
             width: 46, height: 46, borderRadius: 13, flexShrink: 0,
-            background: `${tColors[e.type] || T.lime}15`,
-            border: `1px solid ${tColors[e.type] || T.lime}30`,
+            background: "" + tColors[e.type] || T.lime + "15",
+            border: "1px solid " + tColors[e.type] || T.lime + "30",
             display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20
           }}>{tIcons[e.type] || "📅"}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 700, fontSize: 14, color: T.t1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {e.type === "Match" ? `⚔️ vs ${e.adversaire}` : e.titre || e.type}
+              {e.type === "Match" ? "⚔️ vs " + e.adversaire + "" : e.titre || e.type}
             </div>
-            <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>📅 {e.date} · ⏰ {e.heure_debut}{e.terrain ? ` · 📍 ${e.terrain}` : ""}</div>
+            <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>📅 {e.date} · ⏰ {e.heure_debut}{e.terrain ? " · 📍 " + e.terrain + "" : ""}</div>
           </div>
           <Badge color={tColors[e.type] || T.lime}>{e.type}</Badge>
         </Card>
@@ -450,7 +450,7 @@ function Dashboard({ joueurs, events }) {
           <SectionLabel>🚑 Blessés</SectionLabel>
           {blesses.map(j => (
             <Card key={j.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <Avatar name={`${j.prenom} ${j.nom}`} />
+              <Avatar name={"${j.prenom} " + j.nom + ""} />
               <div>
                 <div style={{ fontWeight: 700 }}>{j.prenom} {j.nom}</div>
                 <Badge color={T.red} style={{ marginTop: 4 }}>🚑 Indisponible</Badge>
@@ -470,7 +470,7 @@ function JoueurForm({ form, onChange, onSave, saving, editMode, onClose }) {
   const set = (k) => (e) => onChange({ ...form, [k]: e.target.value });
   return (
     <Drawer title={editMode ? "Modifier le joueur" : "Nouveau joueur"} onClose={onClose}>
-      <div style={{ background: T.limeBg, border: `1px solid ${T.lime}20`, borderRadius: 10, padding: 10, marginBottom: 16, fontSize: 12, color: T.lime, fontWeight: 600 }}>⚽ Informations du joueur</div>
+      <div style={{ background: T.limeBg, border: "1px solid " + T.lime + "20", borderRadius: 10, padding: 10, marginBottom: 16, fontSize: 12, color: T.lime, fontWeight: 600 }}>⚽ Informations du joueur</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Input label="Prénom *" value={form.prenom} onChange={set("prenom")} placeholder="Prénom" />
         <Input label="Nom *" value={form.nom} onChange={set("nom")} placeholder="Nom" />
@@ -494,7 +494,7 @@ function JoueurForm({ form, onChange, onSave, saving, editMode, onClose }) {
         <Input label="Poids (kg)" type="number" value={form.poids} onChange={set("poids")} />
       </div>
 
-      <div style={{ background: T.cyanBg, border: `1px solid ${T.cyan}20`, borderRadius: 10, padding: 10, marginBottom: 14, fontSize: 12, color: T.cyan, fontWeight: 600 }}>👨‍👩‍👧 Parent 1</div>
+      <div style={{ background: T.cyanBg, border: "1px solid " + T.cyan + "20", borderRadius: 10, padding: 10, marginBottom: 14, fontSize: 12, color: T.cyan, fontWeight: 600 }}>👨‍👩‍👧 Parent 1</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Input label="Prénom" value={form.parent1_prenom} onChange={set("parent1_prenom")} placeholder="Prénom" />
         <Input label="Nom" value={form.parent1_nom} onChange={set("parent1_nom")} placeholder="Nom" />
@@ -502,7 +502,7 @@ function JoueurForm({ form, onChange, onSave, saving, editMode, onClose }) {
       <Input label="Téléphone" type="tel" value={form.parent1_telephone} onChange={set("parent1_telephone")} placeholder="06 00 00 00 00" />
       <Input label="Email" type="email" value={form.parent1_email} onChange={set("parent1_email")} placeholder="parent@email.com" />
 
-      <div style={{ background: T.cyanBg, border: `1px solid ${T.cyan}20`, borderRadius: 10, padding: 10, marginBottom: 14, fontSize: 12, color: T.cyan, fontWeight: 600 }}>👨‍👩‍👧 Parent 2 (optionnel)</div>
+      <div style={{ background: T.cyanBg, border: "1px solid " + T.cyan + "20", borderRadius: 10, padding: 10, marginBottom: 14, fontSize: 12, color: T.cyan, fontWeight: 600 }}>👨‍👩‍👧 Parent 2 (optionnel)</div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Input label="Prénom" value={form.parent2_prenom} onChange={set("parent2_prenom")} placeholder="Prénom" />
         <Input label="Nom" value={form.parent2_nom} onChange={set("parent2_nom")} placeholder="Nom" />
@@ -510,13 +510,13 @@ function JoueurForm({ form, onChange, onSave, saving, editMode, onClose }) {
       <Input label="Téléphone" type="tel" value={form.parent2_telephone} onChange={set("parent2_telephone")} placeholder="06 00 00 00 00" />
       <Input label="Email" type="email" value={form.parent2_email} onChange={set("parent2_email")} placeholder="parent2@email.com" />
 
-      <div style={{ background: T.redBg, border: `1px solid ${T.red}20`, borderRadius: 10, padding: 10, marginBottom: 14, fontSize: 12, color: T.red, fontWeight: 600 }}>🩺 Médical</div>
+      <div style={{ background: T.redBg, border: "1px solid " + T.red + "20", borderRadius: 10, padding: 10, marginBottom: 14, fontSize: 12, color: T.red, fontWeight: 600 }}>🩺 Médical</div>
       <Input label="Informations médicales" value={form.infos_medicales} onChange={set("infos_medicales")} placeholder="Asthme, traitement en cours..." />
       <Input label="Allergies ⚠️" value={form.allergies} onChange={set("allergies")} placeholder="Arachides, latex, médicaments..." />
 
       <Field label="Notes éducateur (privées)">
         <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-          <textarea autoComplete="off" style={{ flex: 1, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, padding: "12px 14px", fontSize: 14, color: T.t1, outline: "none", minHeight: 70, resize: "vertical" }} value={form.notes_educateur} onChange={set("notes_educateur")} placeholder="Notes privées..." />
+          <textarea autoComplete="off" style={{ flex: 1, background: T.surface, border: "1px solid " + T.border, borderRadius: 10, padding: "12px 14px", fontSize: 14, color: T.t1, outline: "none", minHeight: 70, resize: "vertical" }} value={form.notes_educateur} onChange={set("notes_educateur")} placeholder="Notes privées..." />
           <MicBtn onResult={t => onChange({ ...form, notes_educateur: form.notes_educateur + " " + t })} />
         </div>
       </Field>
@@ -582,7 +582,7 @@ function Joueurs() {
   };
 
   const filtered = joueurs.filter(j => {
-    const ms = `${j.prenom} ${j.nom}`.toLowerCase().includes(search.toLowerCase());
+    const ms = "${j.prenom} " + j.nom + "".toLowerCase().includes(search.toLowerCase());
     const mp = filterPoste === "Tous" || j.poste === filterPoste;
     return ms && mp;
   });
@@ -591,14 +591,14 @@ function Joueurs() {
     const j = selected;
     return (
       <div>
-        {confirmDel && <Confirm msg={`Archiver ${j.prenom} ${j.nom} ?`} onOk={archive} onCancel={() => setConfirmDel(false)} />}
+        {confirmDel && <Confirm msg={"Archiver ${j.prenom} " + j.nom + " ?"} onOk={archive} onCancel={() => setConfirmDel(false)} />}
         {showForm && <JoueurForm form={form} onChange={setForm} onSave={save} saving={saving} editMode={editMode} onClose={() => { setShowForm(false); setEditMode(false); setForm(emptyJoueur); }} />}
 
         <button onClick={() => setSelected(null)} style={{ background: "none", border: "none", color: T.t3, cursor: "pointer", fontSize: 14, marginBottom: 16, display: "flex", alignItems: "center", gap: 6, padding: 0 }}>← Retour</button>
 
-        <Card style={{ background: `linear-gradient(135deg, ${getAvatarColor(j.prenom)}15 0%, ${T.card} 60%)`, border: `1px solid ${getAvatarColor(j.prenom)}25` }}>
+        <Card style={{ background: "linear-gradient(135deg, ${getAvatarColor(j.prenom)}15 0%, " + T.card + " 60%)", border: "1px solid " + getAvatarColor(j.prenom) + "25" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 14 }}>
-            <Avatar name={`${j.prenom} ${j.nom}`} size={64} />
+            <Avatar name={"${j.prenom} " + j.nom + ""} size={64} />
             <div>
               <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 22, fontWeight: 700, color: T.t1 }}>{j.prenom} {j.nom}</div>
               <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
@@ -615,8 +615,8 @@ function Joueurs() {
 
         <Card>
           <SectionLabel>Infos</SectionLabel>
-          {[["Naissance", j.date_naissance || "—"], ["Pied fort", j.pied || "—"], ["Poste 2", j.poste_secondaire || "—"], ["Taille", j.taille ? `${j.taille} cm` : "—"], ["Poids", j.poids ? `${j.poids} kg` : "—"]].map(([k, v]) => (
-            <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: `1px solid ${T.border}`, fontSize: 14 }}>
+          {[["Naissance", j.date_naissance || "—"], ["Pied fort", j.pied || "—"], ["Poste 2", j.poste_secondaire || "—"], ["Taille", j.taille ? "" + j.taille + " cm" : "—"], ["Poids", j.poids ? "" + j.poids + " kg" : "—"]].map(([k, v]) => (
+            <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid " + T.border, fontSize: 14 }}>
               <span style={{ color: T.t3 }}>{k}</span>
               <span style={{ fontWeight: 600, color: T.t1 }}>{v}</span>
             </div>
@@ -628,18 +628,18 @@ function Joueurs() {
             <SectionLabel>Contacts parents</SectionLabel>
             <div style={{ marginBottom: j.parent2_nom ? 12 : 0 }}>
               <div style={{ fontWeight: 700, fontSize: 14 }}>{j.parent1_prenom} {j.parent1_nom}</div>
-              {j.parent1_telephone && <div style={{ color: T.t3, fontSize: 13, marginTop: 3 }}>📞 <a href={`tel:${j.parent1_telephone}`} style={{ color: T.cyan }}>{j.parent1_telephone}</a></div>}
+              {j.parent1_telephone && <div style={{ color: T.t3, fontSize: 13, marginTop: 3 }}>📞 <a href={"tel:" + j.parent1_telephone + ""} style={{ color: T.cyan }}>{j.parent1_telephone}</a></div>}
               {j.parent1_email && <div style={{ color: T.t3, fontSize: 13 }}>✉️ {j.parent1_email}</div>}
             </div>
             {j.parent2_nom && <div>
               <div style={{ fontWeight: 700, fontSize: 14 }}>{j.parent2_prenom} {j.parent2_nom}</div>
-              {j.parent2_telephone && <div style={{ color: T.t3, fontSize: 13, marginTop: 3 }}>📞 <a href={`tel:${j.parent2_telephone}`} style={{ color: T.cyan }}>{j.parent2_telephone}</a></div>}
+              {j.parent2_telephone && <div style={{ color: T.t3, fontSize: 13, marginTop: 3 }}>📞 <a href={"tel:" + j.parent2_telephone + ""} style={{ color: T.cyan }}>{j.parent2_telephone}</a></div>}
             </div>}
           </Card>
         )}
 
         {(j.infos_medicales || j.allergies) && (
-          <Card style={{ border: `1px solid ${T.red}25` }}>
+          <Card style={{ border: "1px solid " + T.red + "25" }}>
             <SectionLabel>Médical</SectionLabel>
             {j.infos_medicales && <p style={{ margin: "0 0 8px", fontSize: 14, color: T.t2 }}>{j.infos_medicales}</p>}
             {j.allergies && <p style={{ margin: 0, fontSize: 14, color: T.red, fontWeight: 700 }}>⚠️ Allergies : {j.allergies}</p>}
@@ -662,11 +662,11 @@ function Joueurs() {
 
       <Btn full style={{ marginBottom: 14 }} onClick={() => { setForm(emptyJoueur); setEditMode(false); setShowForm(true); }}>+ Ajouter un joueur</Btn>
 
-      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Rechercher..." style={{ width: "100%", background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, padding: "11px 14px", fontSize: 15, color: T.t1, outline: "none", boxSizing: "border-box", marginBottom: 10 }} />
+      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="🔍 Rechercher..." style={{ width: "100%", background: T.surface, border: "1px solid " + T.border, borderRadius: 10, padding: "11px 14px", fontSize: 15, color: T.t1, outline: "none", boxSizing: "border-box", marginBottom: 10 }} />
 
       <div style={{ display: "flex", gap: 6, marginBottom: 14, overflowX: "auto", paddingBottom: 2 }}>
         {["Tous", ...postes].map(p => (
-          <button key={p} onClick={() => setFilterPoste(p)} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: "pointer", flexShrink: 0, border: `1px solid ${filterPoste === p ? (posteColor[p] || T.lime) : T.border}`, background: filterPoste === p ? `${posteColor[p] || T.lime}15` : "transparent", color: filterPoste === p ? (posteColor[p] || T.lime) : T.t3 }}>{p}</button>
+          <button key={p} onClick={() => setFilterPoste(p)} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: "pointer", flexShrink: 0, border: "1px solid " + filterPoste === p ? (posteColor[p] || T.lime) : T.border + "", background: filterPoste === p ? "" + posteColor[p] || T.lime + "15" : "transparent", color: filterPoste === p ? (posteColor[p] || T.lime) : T.t3 }}>{p}</button>
         ))}
       </div>
 
@@ -677,7 +677,7 @@ function Joueurs() {
         {filtered.map(j => (
           <Card key={j.id} style={{ margin: 0, cursor: "pointer" }} onClick={() => setSelected(j)}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-              <Avatar name={`${j.prenom} ${j.nom}`} size={38} />
+              <Avatar name={"${j.prenom} " + j.nom + ""} size={38} />
               <span style={{ fontSize: 18 }}>{posteIcon[j.poste] || "⚽"}</span>
             </div>
             <div style={{ fontWeight: 800, fontSize: 14, color: T.t1 }}>{j.prenom}</div>
@@ -741,10 +741,10 @@ function Calendrier() {
     const e = delModal;
     if (opt === "seul") { await db.del("evenements", e.id); }
     else if (opt === "futurs") {
-      const all = await db.get(`evenements?recurrence=eq.${encodeURIComponent(e.recurrence)}&date=gte.${e.date}`);
+      const all = await db.get("evenements?recurrence=eq.${encodeURIComponent(e.recurrence)}&date=gte." + e.date + "");
       for (const x of (all || [])) await db.del("evenements", x.id);
     } else {
-      const all = await db.get(`evenements?recurrence=eq.${encodeURIComponent(e.recurrence)}`);
+      const all = await db.get("evenements?recurrence=eq." + encodeURIComponent(e.recurrence) + "");
       for (const x of (all || [])) await db.del("evenements", x.id);
     }
     setDelModal(null); load();
@@ -761,14 +761,14 @@ function Calendrier() {
       {events.map(e => (
         <Card key={e.id}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 13, background: `${tColors[e.type] || T.lime}15`, border: `1px solid ${tColors[e.type] || T.lime}25`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>{tIcons[e.type] || "📅"}</div>
+            <div style={{ width: 46, height: 46, borderRadius: 13, background: "" + tColors[e.type] || T.lime + "15", border: "1px solid " + tColors[e.type] || T.lime + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>{tIcons[e.type] || "📅"}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                <span style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{e.type === "Match" ? `vs ${e.adversaire}${e.format ? " (Foot "+e.format+")" : ""}` : e.titre || e.type}</span>
+                <span style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{e.type === "Match" ? "vs ${e.adversaire}" + e.format ? " (Foot "+e.format+")" : "" + "" : e.titre || e.type}</span>
                 {e.valide && <Badge color={T.lime} style={{ fontSize: 10 }}>✅ Validé</Badge>}
                 {e.recurrence && e.recurrence !== "aucune" && <Badge color={T.cyan} style={{ fontSize: 10 }}>🔄</Badge>}
               </div>
-              <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>📅 {e.date} · ⏰ {e.heure_debut}{e.heure_fin ? ` – ${e.heure_fin}` : ""}</div>
+              <div style={{ fontSize: 12, color: T.t3, marginTop: 2 }}>📅 {e.date} · ⏰ {e.heure_debut}{e.heure_fin ? " – " + e.heure_fin + "" : ""}</div>
               {e.terrain && (
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{ fontSize: 12, color: T.t3 }}>📍 {e.terrain}</div>
@@ -789,9 +789,9 @@ function Calendrier() {
 
       {delModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", zIndex: 600, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-          <div style={{ background: T.card, borderRadius: 18, padding: 24, width: "100%", maxWidth: 340, border: `1px solid ${T.border}` }}>
+          <div style={{ background: T.card, borderRadius: 18, padding: 24, width: "100%", maxWidth: 340, border: "1px solid " + T.border }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: T.t1, marginBottom: 6, textAlign: "center" }}>🗑️ Supprimer</div>
-            <div style={{ fontSize: 13, color: T.t3, textAlign: "center", marginBottom: 18 }}>{delModal.type === "Match" ? `vs ${delModal.adversaire}` : delModal.titre || delModal.type} — {delModal.date}</div>
+            <div style={{ fontSize: 13, color: T.t3, textAlign: "center", marginBottom: 18 }}>{delModal.type === "Match" ? "vs " + delModal.adversaire + "" : delModal.titre || delModal.type} — {delModal.date}</div>
             {delModal.recurrence && delModal.recurrence !== "aucune" ? (
               <>
                 <Btn full variant="ghost" size="sm" onClick={() => handleDel("seul")} style={{ marginBottom: 8 }}>📌 Cet événement uniquement</Btn>
@@ -809,7 +809,7 @@ function Calendrier() {
           <Field label="Type">
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {["Entraînement", "Match", "Tournoi", "Réunion", "Stage"].map(t => (
-                <button key={t} onClick={() => setForm(p => ({ ...p, type: t }))} style={{ padding: "7px 12px", borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: "pointer", border: `1.5px solid ${form.type === t ? tColors[t] : T.border}`, background: form.type === t ? `${tColors[t]}18` : "transparent", color: form.type === t ? tColors[t] : T.t3 }}>
+                <button key={t} onClick={() => setForm(p => ({ ...p, type: t }))} style={{ padding: "7px 12px", borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: "pointer", border: "1.5px solid " + form.type === t ? tColors[t] : T.border + "", background: form.type === t ? "" + tColors[t] + "18" : "transparent", color: form.type === t ? tColors[t] : T.t3 }}>
                   {tIcons[t]} {t}
                 </button>
               ))}
@@ -852,7 +852,7 @@ function Calendrier() {
                 <option value="bihebdomadaire">Toutes les 2 semaines</option>
                 <option value="saison">Toute la saison (jusqu'au 30/06/2026)</option>
               </Sel>
-              {form.recurrence !== "aucune" && <div style={{ background: T.cyanBg, border: `1px solid ${T.cyan}20`, borderRadius: 8, padding: 10, marginBottom: 14, fontSize: 12, color: T.cyan }}>ℹ️ Événements créés jusqu'au 30 juin 2026</div>}
+              {form.recurrence !== "aucune" && <div style={{ background: T.cyanBg, border: "1px solid " + T.cyan + "20", borderRadius: 8, padding: 10, marginBottom: 14, fontSize: 12, color: T.cyan }}>ℹ️ Événements créés jusqu'au 30 juin 2026</div>}
             </>
           )}
           <div style={{ display: "flex", gap: 10 }}>
@@ -886,7 +886,7 @@ function Convocations() {
   }, []);
 
   const loadConvocs = async id => {
-    const data = await db.get(`convocations?evenement_id=eq.${id}`);
+    const data = await db.get("convocations?evenement_id=eq." + id + "");
     setConvocs(data || []);
   };
 
@@ -962,15 +962,15 @@ function Convocations() {
         const co = convocs.find(c => c.joueur_id === j.id && c.categorie !== equipe);
         const eColor = equipe === "11" ? T.lime : T.cyan;
         return (
-          <Card key={j.id} style={{ border: `1px solid ${cc ? eColor + "40" : T.border}` }}>
+          <Card key={j.id} style={{ border: "1px solid " + cc ? eColor + "40" : T.border + "" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: cc ? 10 : 0 }}>
-              <Avatar name={`${j.prenom} ${j.nom}`} size={38} />
+              <Avatar name={"${j.prenom} " + j.nom + ""} size={38} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 14 }}>{j.prenom} {j.nom}</div>
                 <div style={{ fontSize: 12, color: T.t3 }}>{j.poste}</div>
                 {co && <Badge color={T.amber} style={{ fontSize: 10, marginTop: 4 }}>Dans Foot à {co.categorie === "11" ? "11" : "8"}</Badge>}
               </div>
-              <button onClick={() => toggle(j.id)} style={{ padding: "7px 14px", borderRadius: 10, fontSize: 12, fontWeight: 700, border: `1.5px solid ${cc ? eColor : T.border}`, background: cc ? `${eColor}18` : "transparent", color: cc ? eColor : T.t3, cursor: "pointer" }}>
+              <button onClick={() => toggle(j.id)} style={{ padding: "7px 14px", borderRadius: 10, fontSize: 12, fontWeight: 700, border: "1.5px solid " + cc ? eColor : T.border + "", background: cc ? "" + eColor + "18" : "transparent", color: cc ? eColor : T.t3, cursor: "pointer" }}>
                 {cc ? "✓ Convoqué" : "+ Convoquer"}
               </button>
             </div>
@@ -979,7 +979,7 @@ function Convocations() {
                 <div style={{ fontSize: 11, color: T.t3, marginBottom: 6, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" }}>Réponse parent</div>
                 <div style={{ display: "flex", gap: 6 }}>
                   {Object.entries(repC).map(([r, color]) => (
-                    <button key={r} onClick={() => repondre(cc.id, r)} style={{ flex: 1, padding: "8px 4px", borderRadius: 10, fontSize: 11, fontWeight: 700, border: `1.5px solid ${cc.reponse === r ? color : T.border}`, background: cc.reponse === r ? `${color}18` : "transparent", color: cc.reponse === r ? color : T.t3, cursor: "pointer", textAlign: "center" }}>
+                    <button key={r} onClick={() => repondre(cc.id, r)} style={{ flex: 1, padding: "8px 4px", borderRadius: 10, fontSize: 11, fontWeight: 700, border: "1.5px solid " + cc.reponse === r ? color : T.border + "", background: cc.reponse === r ? "" + color + "18" : "transparent", color: cc.reponse === r ? color : T.t3, cursor: "pointer", textAlign: "center" }}>
                       {repI[r]}<br /><span style={{ fontSize: 10 }}>{r}</span>
                     </button>
                   ))}
@@ -1000,7 +1000,7 @@ function Convocations() {
       {matchs.map(m => (
         <Card key={m.id} onClick={() => { setSelected(m); loadConvocs(m.id); }} style={{ cursor: "pointer" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 13, background: T.redBg, border: `1px solid ${T.red}25`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>⚔️</div>
+            <div style={{ width: 46, height: 46, borderRadius: 13, background: T.redBg, border: "1px solid " + T.red + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>⚔️</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 15, color: T.t1 }}>vs {m.adversaire}</div>
               <div style={{ fontSize: 12, color: T.t3 }}>📅 {m.date} · ⏰ {m.heure_debut} · 📍 {m.terrain || "—"}</div>
@@ -1065,15 +1065,15 @@ function Statistiques() {
           const medals = ["🥇", "🥈", "🥉"];
           return (
             <div key={j.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: i < sorted.length - 1 ? 14 : 0 }}>
-              <div style={{ width: 28, textAlign: "center", fontWeight: 900, fontSize: 16, color: i < 3 ? color : T.t3 }}>{medals[i] || `${i + 1}`}</div>
-              <Avatar name={`${j.prenom} ${j.nom}`} size={36} />
+              <div style={{ width: 28, textAlign: "center", fontWeight: 900, fontSize: 16, color: i < 3 ? color : T.t3 }}>{medals[i] || "" + i + 1 + ""}</div>
+              <Avatar name={"${j.prenom} " + j.nom + ""} size={36} />
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
                   <span style={{ fontWeight: 700, fontSize: 13 }}>{j.prenom} {j.nom}</span>
                   <span style={{ fontWeight: 900, color, fontSize: 15 }}>{val}</span>
                 </div>
-                <div style={{ height: 4, borderRadius: 2, background: `${color}20` }}>
-                  <div style={{ width: `${(val / maxV) * 100}%`, height: "100%", background: color, borderRadius: 2, transition: "width .5s" }} />
+                <div style={{ height: 4, borderRadius: 2, background: "" + color + "20" }}>
+                  <div style={{ width: "" + (val / maxV) * 100 + "%", height: "100%", background: color, borderRadius: 2, transition: "width .5s" }} />
                 </div>
               </div>
             </div>
@@ -1152,14 +1152,14 @@ function Blessures() {
         return (
           <Card key={b.id}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              <Avatar name={j ? `${j.prenom} ${j.nom}` : "?"} size={38} />
+              <Avatar name={j ? "${j.prenom} " + j.nom + "" : "?"} size={38} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 14 }}>{j ? `${j.prenom} ${j.nom}` : "Joueur"}</div>
+                <div style={{ fontWeight: 700, fontSize: 14 }}>{j ? "${j.prenom} " + j.nom + "" : "Joueur"}</div>
                 <div style={{ fontSize: 12, color: T.t3 }}>📅 {b.date_blessure}</div>
               </div>
               <Badge color={gC[b.gravite] || T.t3}>{b.gravite}</Badge>
             </div>
-            {b.type_blessure && <div style={{ fontSize: 13, color: T.t2, marginBottom: 4 }}>🩹 {b.type_blessure}{b.zone_corps ? ` — ${b.zone_corps}` : ""}</div>}
+            {b.type_blessure && <div style={{ fontSize: 13, color: T.t2, marginBottom: 4 }}>🩹 {b.type_blessure}{b.zone_corps ? " — " + b.zone_corps + "" : ""}</div>}
             {b.date_reprise_prevue && <div style={{ fontSize: 12, color: T.t3, marginBottom: 8 }}>🔄 Reprise prévue : {b.date_reprise_prevue}</div>}
             <div style={{ marginBottom: 10 }}>
               <Badge color={b.statut === "en cours" ? T.red : T.lime}>{b.statut === "en cours" ? "🔴 En cours" : "✅ Guéri"}</Badge>
@@ -1181,7 +1181,7 @@ function Blessures() {
           <Input label="Date *" type="date" value={form.date_blessure} onChange={e => setForm({ ...form, date_blessure: e.target.value })} />
           <Field label="Type de blessure 🎤">
             <div style={{ display: "flex", gap: 8 }}>
-              <input autoComplete="off" style={{ flex: 1, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, padding: "12px 14px", fontSize: 15, color: T.t1, outline: "none" }} value={form.type_blessure} onChange={e => setForm({ ...form, type_blessure: e.target.value })} placeholder="Entorse, fracture..." />
+              <input autoComplete="off" style={{ flex: 1, background: T.surface, border: "1px solid " + T.border, borderRadius: 10, padding: "12px 14px", fontSize: 15, color: T.t1, outline: "none" }} value={form.type_blessure} onChange={e => setForm({ ...form, type_blessure: e.target.value })} placeholder="Entorse, fracture..." />
               <MicBtn onResult={t => setForm(p => ({ ...p, type_blessure: t }))} />
             </div>
           </Field>
@@ -1271,9 +1271,9 @@ function Bilans() {
         return (
           <Card key={b.id}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-              <Avatar name={j ? `${j.prenom} ${j.nom}` : "?"} size={38} />
+              <Avatar name={j ? "${j.prenom} " + j.nom + "" : "?"} size={38} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, fontSize: 15, color: T.t1 }}>{j ? `${j.prenom} ${j.nom}` : "Joueur"}</div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: T.t1 }}>{j ? "${j.prenom} " + j.nom + "" : "Joueur"}</div>
                 <div style={{ fontSize: 12, color: T.t3 }}>📅 {b.mois}</div>
               </div>
             </div>
@@ -1310,7 +1310,7 @@ function Bilans() {
                 <div key={key}>
                   <div style={{ fontSize: 11, color: T.t3, marginBottom: 6, fontWeight: 700 }}>{label}</div>
                   <div style={{ display: "flex", gap: 4 }}>
-                    {notes.map(n => <button key={n} onClick={() => setForm({ ...form, [key]: n })} style={{ flex: 1, padding: "7px", borderRadius: 8, fontSize: 15, border: `1.5px solid ${form[key] === n ? T.lime : T.border}`, background: form[key] === n ? T.limeBg : "transparent", cursor: "pointer" }}>{n}</button>)}
+                    {notes.map(n => <button key={n} onClick={() => setForm({ ...form, [key]: n })} style={{ flex: 1, padding: "7px", borderRadius: 8, fontSize: 15, border: "1.5px solid " + form[key] === n ? T.lime : T.border + "", background: form[key] === n ? T.limeBg : "transparent", cursor: "pointer" }}>{n}</button>)}
                   </div>
                 </div>
               ))}
@@ -1365,7 +1365,7 @@ function Messages({ user }) {
         <SectionLabel>Envoyer à</SectionLabel>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {dests.map(d => (
-            <button key={d.id} onClick={() => setDest(d.id)} style={{ padding: "7px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: "pointer", border: `1px solid ${dest === d.id ? d.color : T.border}`, background: dest === d.id ? `${d.color}15` : "transparent", color: dest === d.id ? d.color : T.t3 }}>
+            <button key={d.id} onClick={() => setDest(d.id)} style={{ padding: "7px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: "pointer", border: "1px solid " + dest === d.id ? d.color : T.border + "", background: dest === d.id ? "" + d.color + "15" : "transparent", color: dest === d.id ? d.color : T.t3 }}>
               {d.label}
             </button>
           ))}
@@ -1378,7 +1378,7 @@ function Messages({ user }) {
         const isMe = m.de === user.nom;
         const dc = dests.find(d => d.id === m.a)?.color || T.t3;
         return (
-          <Card key={m.id} style={{ background: isMe ? T.limeBg : T.card, border: `1px solid ${isMe ? T.lime + "30" : T.border}` }}>
+          <Card key={m.id} style={{ background: isMe ? T.limeBg : T.card, border: "1px solid " + isMe ? T.lime + "30" : T.border + "" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, alignItems: "center" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ fontSize: 12, fontWeight: 700, color: isMe ? T.lime : T.t3 }}>{m.de}</span>
@@ -1395,11 +1395,11 @@ function Messages({ user }) {
         );
       })}
 
-      <div style={{ position: "fixed", bottom: 64, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, padding: "10px 16px", background: T.card, borderTop: `1px solid ${T.border}`, boxSizing: "border-box", zIndex: 150 }}>
+      <div style={{ position: "fixed", bottom: 64, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 430, padding: "10px 16px", background: T.card, borderTop: "1px solid " + T.border, boxSizing: "border-box", zIndex: 150 }}>
         <div style={{ fontSize: 11, color: T.t3, marginBottom: 6, fontWeight: 600 }}>→ {dests.find(d => d.id === dest)?.label}</div>
         <div style={{ display: "flex", gap: 8 }}>
           <MicBtn onResult={t => setText(p => p + " " + t)} />
-          <input style={{ flex: 1, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, padding: "11px 14px", fontSize: 15, color: T.t1, outline: "none" }} placeholder="Message..." value={text} onChange={e => setText(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} autoComplete="off" />
+          <input style={{ flex: 1, background: T.surface, border: "1px solid " + T.border, borderRadius: 10, padding: "11px 14px", fontSize: 15, color: T.t1, outline: "none" }} placeholder="Message..." value={text} onChange={e => setText(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} autoComplete="off" />
           <button onClick={send} style={{ width: 44, height: 44, borderRadius: 10, background: text.trim() ? T.lime : T.border, border: "none", cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: text.trim() ? T.bg : T.t3 }}>➤</button>
         </div>
       </div>
@@ -1448,7 +1448,7 @@ function Resultats() {
         return (
           <Card key={m.id}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 46, height: 46, borderRadius: 13, background: T.redBg, border: `1px solid ${T.red}25`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>⚔️</div>
+              <div style={{ width: 46, height: 46, borderRadius: 13, background: T.redBg, border: "1px solid " + T.red + "25", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>⚔️</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>vs {m.adversaire}</div>
                 <div style={{ fontSize: 12, color: T.t3 }}>📅 {m.date} · 📍 {m.terrain || "—"}</div>
@@ -1469,16 +1469,16 @@ function Resultats() {
         );
       })}
       {selected && (
-        <Drawer title={`Résultat vs ${selected.adversaire}`} onClose={() => { setSelected(null); setEditR(null); }}>
+        <Drawer title={"Résultat vs " + selected.adversaire + ""} onClose={() => { setSelected(null); setEditR(null); }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 12, alignItems: "center", marginBottom: 16 }}>
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: T.t3, marginBottom: 8, letterSpacing: 1 }}>NOUS</div>
-              <input type="number" min="0" value={form.score_nous} onChange={e => setForm({ ...form, score_nous: e.target.value })} style={{ width: "100%", background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 8px", fontSize: 38, fontWeight: 900, color: T.lime, outline: "none", textAlign: "center", colorScheme: "dark", fontFamily: "'Space Grotesk',sans-serif" }} placeholder="0" />
+              <input type="number" min="0" value={form.score_nous} onChange={e => setForm({ ...form, score_nous: e.target.value })} style={{ width: "100%", background: T.surface, border: "1px solid " + T.border, borderRadius: 12, padding: "14px 8px", fontSize: 38, fontWeight: 900, color: T.lime, outline: "none", textAlign: "center", colorScheme: "dark", fontFamily: "'Space Grotesk',sans-serif" }} placeholder="0" />
             </div>
             <div style={{ fontSize: 26, color: T.t3, fontWeight: 900, textAlign: "center" }}>—</div>
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: T.t3, marginBottom: 8, letterSpacing: 1 }}>EUX</div>
-              <input type="number" min="0" value={form.score_adversaire} onChange={e => setForm({ ...form, score_adversaire: e.target.value })} style={{ width: "100%", background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 8px", fontSize: 38, fontWeight: 900, color: T.red, outline: "none", textAlign: "center", colorScheme: "dark", fontFamily: "'Space Grotesk',sans-serif" }} placeholder="0" />
+              <input type="number" min="0" value={form.score_adversaire} onChange={e => setForm({ ...form, score_adversaire: e.target.value })} style={{ width: "100%", background: T.surface, border: "1px solid " + T.border, borderRadius: 12, padding: "14px 8px", fontSize: 38, fontWeight: 900, color: T.red, outline: "none", textAlign: "center", colorScheme: "dark", fontFamily: "'Space Grotesk',sans-serif" }} placeholder="0" />
             </div>
           </div>
           <TA label="Résumé du match 🎤" voice onVoice={t => setForm(p => ({ ...p, resume: p.resume + " " + t }))} value={form.resume} onChange={e => setForm({ ...form, resume: e.target.value })} placeholder="Résumé, buteurs, points clés..." />
@@ -1533,10 +1533,10 @@ function Materiel() {
       {items.map(item => (
         <Card key={item.id}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 13, background: T.limeBg, border: `1px solid ${T.lime}20`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{mI[item.nom] || "📦"}</div>
+            <div style={{ width: 46, height: 46, borderRadius: 13, background: T.limeBg, border: "1px solid " + T.lime + "20", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>{mI[item.nom] || "📦"}</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 14, color: T.t1 }}>{item.nom}</div>
-              <div style={{ fontSize: 12, color: T.t3 }}>Qté : {item.quantite}{item.responsable ? ` · 👤 ${item.responsable}` : ""}</div>
+              <div style={{ fontSize: 12, color: T.t3 }}>Qté : {item.quantite}{item.responsable ? " · 👤 " + item.responsable + "" : ""}</div>
               {item.date_retour && <div style={{ fontSize: 12, color: T.amber }}>🔄 Retour : {item.date_retour}</div>}
             </div>
             <Badge color={eC[item.etat] || T.t3}>{item.etat}</Badge>
@@ -1759,14 +1759,4 @@ function Compositions() {
               <div style={{ fontWeight: 700, fontSize: 13, color: T.t1 }}>{j.prenom} {j.nom}</div>
               <div style={{ fontSize: 11, color: T.t3 }}>{j.poste}</div>
             </div>
-            {sel ? <button onClick={evt => { evt.stopPropagation(); setCapitaine(capitaine === j.id ? null : j.id); }} style={{ padding: "4px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, border: "1px solid " + (capitaine === j.id ? T.amber : T.border), background: capitaine === j.id ? T.amberBg : "transparent", color: capitaine === j.id ? T.amber : T.t3, cursor: "pointer" }}>{"Cap"}</button> : null}
-            <div style={{ width: 24, height: 24, borderRadius: 6, background: sel ? T.lime : T.border, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: sel ? T.bg : T.t3, fontWeight: 700 }}>{sel ? "+" : "+"}</div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-
-// ─── TERRAI
+            {sel ? <button onClick={evt => { evt.stopPropagation(); setCapitaine(capitaine === j.id ? null : j.id); }} style={{ padding: "4px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, border: "1px solid " + (capitaine === j.id ? T.amber : T.border), background: capitaine === j.id ? T.amberBg : "transparent", color: 
