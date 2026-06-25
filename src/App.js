@@ -1743,39 +1743,26 @@ function Terrains() {
   };
 
   const nav = (t, app) => {
-    const q = t.latitude && t.longitude ? t.latitude + "," + t.longitude : encodeURIComponent(t.adresse || t.nom);
+    const q = encodeURIComponent(t.adresse || t.nom);
     const urls = {
-      google: "https://www.google.com/maps?q=" + q,
-      waze: "https://waze.com/ul?ll=" + q + "&navigate=yes",
+      google: "https://www.google.com/maps/search/" + q,
+      waze: "https://waze.com/ul?q=" + q,
       apple: "https://maps.apple.com/?q=" + q
     };
     window.open(urls[app], "_blank");
   };
 
-  const sC = { "Herbe naturelle": T.lime, "Synthetique": T.cyan, "Salle": T.amber };
-  // surface icons removed
-
   return (
     <div>
-      <Btn full style={{ marginBottom: 16 }} onClick={() => { setForm(ef); setShowAdd(true); }}>
-        + Ajouter un terrain
-      </Btn>
-      {confirmDel && (
-        <Confirm
-          msg="Supprimer ce terrain ?"
-          onOk={async () => { await db.del("terrains", confirmDel); setConfirmDel(null); load(); }}
-          onCancel={() => setConfirmDel(null)}
-        />
-      )}
+      <Btn full style={{ marginBottom: 16 }} onClick={() => { setForm(ef); setShowAdd(true); }}>+ Ajouter un terrain</Btn>
+      {confirmDel && <Confirm msg="Supprimer ce terrain ?" onOk={async () => { await db.del("terrains", confirmDel); setConfirmDel(null); load(); }} onCancel={() => setConfirmDel(null)} />}
       {loading && <Spinner />}
-      {!loading && terrains.length === 0 && (
-        <Empty icon="📍" title="Aucun terrain" sub="Ajoutez vos terrains" />
-      )}
+      {!loading && terrains.length === 0 && <Empty icon="📍" title="Aucun terrain" sub="Ajoutez vos terrains" />}
       {terrains.map(t => (
         <Card key={t.id}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 13, background: T.lime + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>
-              {"📍"}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, f
+          <div style={{ fontWeight: 800, fontSize: 15, color: T.t1, marginBottom: 4 }}>{t.nom}</div>
+          {t.adresse ? <div style={{ fontSize: 12, color: T.t3, marginBottom: 8 }}>{t.adresse}</div> : null}
+          <Badge color={T.lime} style={{ marginBottom: 12, fontSize: 10 }}>{t.surface}</Badge>
+          <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+            <button onClick={() => nav(t, "google")} style={{ flex: 1, padding: "9px 6px", borderRadius: 10, background: "#4285F422", border: "1px solid #4285F440", color: "#4285F4", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>Google Maps</button>
+            <button onClick={() => nav(t,
