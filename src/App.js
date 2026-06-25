@@ -833,9 +833,9 @@ function Calendrier() {
                 <option value="aucune">Événement unique</option>
                 <option value="hebdomadaire">Toutes les semaines</option>
                 <option value="bihebdomadaire">Toutes les 2 semaines</option>
-                <option value="saison">Toute la saison (jusqu'au 30/06/2026)</option>
+                <option value="saison">Toute la saison (jusqu&apos;au 30/06/2026)</option>
               </Sel>
-              {form.recurrence !== "aucune" && <div style={{ background: T.cyanBg, border: "1px solid " + T.cyan + "20", borderRadius: 8, padding: 10, marginBottom: 14, fontSize: 12, color: T.cyan }}>ℹ️ Événements créés jusqu'au 30 juin 2026</div>}
+              {form.recurrence !== "aucune" && <div style={{ background: T.cyanBg, border: "1px solid " + T.cyan + "20", borderRadius: 8, padding: 10, marginBottom: 14, fontSize: 12, color: T.cyan }}>ℹ️ Événements créés jusqu&apos;au 30 juin 2026</div>}
             </>
           )}
           <div style={{ display: "flex", gap: 10 }}>
@@ -1777,4 +1777,4 @@ function Terrains() {
             <div style={{ width: 46, height: 46, borderRadius: 13, background: (sC[t.surface] || T.lime) + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>
               {"📍"}
             </div>
-            <d
+    
