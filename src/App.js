@@ -12,7 +12,7 @@ const getToken = () => {
   return SB_KEY;
 };
 
-const api = async (method, path, body) => {
+const api = async (method, path, body) => {9
   const token = getToken();
   const r = await fetch("${SB_URL}/rest/v1/" + path + "", {
     method,
