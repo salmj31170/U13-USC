@@ -12,7 +12,7 @@ const getToken = () => {
   return SB_KEY;
 };
 
-const api = async (method, path, body) => {9
+const api = async (method, path, body) => {
   const token = getToken();
   const r = await fetch("${SB_URL}/rest/v1/" + path + "", {
     method,
@@ -1608,11 +1608,10 @@ function TerrainSearch({ value, onChange, placeholder }) {
   );
 }
 
-// ─── COMPOSITIONS ─────────────────────────────────────────────────────────────
+// COMPOSITIONS
 function Compositions() {
   const [joueurs, setJoueurs] = useState([]);
-  const [selected11, setSelected11] = useState([]);
-  const [selected8, setSelected8] = useState([]);
+  const [selected, setSelected] = useState([]);
   const [formation, setFormation] = useState("4-3-3");
   const [mode, setMode] = useState("11");
   const [loading, setLoading] = useState(true);
@@ -1620,130 +1619,83 @@ function Compositions() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const data = await db.get("joueurs?actif=eq.true&order=poste.asc,nom.asc");
+    const data = await db.get("joueurs?actif=eq.true&order=nom.asc");
     setJoueurs(data || []);
     setLoading(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
-  const formations11 = {
-    "4-3-3": [
-      {pos:"GB",x:50,y:90},{pos:"DD",x:15,y:72},{pos:"DC",x:35,y:72},{pos:"DC",x:65,y:72},{pos:"DG",x:85,y:72},
-      {pos:"MD",x:20,y:48},{pos:"MC",x:50,y:45},{pos:"MG",x:80,y:48},
-      {pos:"AD",x:15,y:22},{pos:"AC",x:50,y:16},{pos:"AG",x:85,y:22}
-    ],
-    "4-4-2": [
-      {pos:"GB",x:50,y:90},{pos:"DD",x:15,y:72},{pos:"DC",x:35,y:72},{pos:"DC",x:65,y:72},{pos:"DG",x:85,y:72},
-      {pos:"MD",x:15,y:50},{pos:"MC",x:38,y:50},{pos:"MC",x:62,y:50},{pos:"MG",x:85,y:50},
-      {pos:"AT",x:33,y:22},{pos:"AT",x:67,y:22}
-    ],
-    "3-5-2": [
-      {pos:"GB",x:50,y:90},{pos:"DC",x:25,y:72},{pos:"DC",x:50,y:72},{pos:"DC",x:75,y:72},
-      {pos:"MD",x:10,y:50},{pos:"MC",x:30,y:48},{pos:"MC",x:50,y:45},{pos:"MC",x:70,y:48},{pos:"MG",x:90,y:50},
-      {pos:"AT",x:33,y:22},{pos:"AT",x:67,y:22}
-    ],
+  const f11 = {
+    "4-3-3": [{pos:"GB",x:50,y:90},{pos:"DD",x:15,y:72},{pos:"DC",x:35,y:72},{pos:"DC",x:65,y:72},{pos:"DG",x:85,y:72},{pos:"MD",x:20,y:48},{pos:"MC",x:50,y:45},{pos:"MG",x:80,y:48},{pos:"AD",x:15,y:22},{pos:"AC",x:50,y:16},{pos:"AG",x:85,y:22}],
+    "4-4-2": [{pos:"GB",x:50,y:90},{pos:"DD",x:15,y:72},{pos:"DC",x:35,y:72},{pos:"DC",x:65,y:72},{pos:"DG",x:85,y:72},{pos:"MD",x:15,y:50},{pos:"MC",x:38,y:50},{pos:"MC",x:62,y:50},{pos:"MG",x:85,y:50},{pos:"AT",x:33,y:22},{pos:"AT",x:67,y:22}],
+    "3-5-2": [{pos:"GB",x:50,y:90},{pos:"DC",x:25,y:72},{pos:"DC",x:50,y:72},{pos:"DC",x:75,y:72},{pos:"MD",x:10,y:50},{pos:"MC",x:30,y:48},{pos:"MC",x:50,y:45},{pos:"MC",x:70,y:48},{pos:"MG",x:90,y:50},{pos:"AT",x:33,y:22},{pos:"AT",x:67,y:22}],
   };
+  const f8 = [{pos:"GB",x:50,y:90},{pos:"DD",x:20,y:70},{pos:"DC",x:50,y:70},{pos:"DG",x:80,y:70},{pos:"MD",x:20,y:46},{pos:"MC",x:50,y:44},{pos:"MG",x:80,y:46},{pos:"AT",x:50,y:18}];
 
-  const formations8 = [
-    {pos:"GB",x:50,y:90},{pos:"DD",x:20,y:70},{pos:"DC",x:50,y:70},{pos:"DG",x:80,y:70},
-    {pos:"MD",x:20,y:46},{pos:"MC",x:50,y:44},{pos:"MG",x:80,y:46},
-    {pos:"AT",x:50,y:18}
-  ];
-
-  const posData = mode === "11" ? (formations11[formation] || formations11["4-3-3"]) : formations8;
-  const selected = mode === "11" ? selected11 : selected8;
-  const setSelected = mode === "11" ? setSelected11 : setSelected8;
-  const maxPlayers = mode === "11" ? 11 : 8;
-
-  const togglePlayer = (j) => {
-    setSelected(prev => {
-      const isIn = prev.find(x => x.id === j.id);
-      if (isIn) return prev.filter(x => x.id !== j.id);
-      if (prev.length >= maxPlayers) return prev;
-      return [...prev, j];
-    });
-  };
-
-  const isSelected = (j) => selected.find(x => x.id === j.id);
+  const posData = mode === "11" ? (f11[formation] || f11["4-3-3"]) : f8;
+  const maxP = mode === "11" ? 11 : 8;
+  const toggle = (j) => setSelected(prev => { const isIn = prev.find(x => x.id === j.id); if (isIn) return prev.filter(x => x.id !== j.id); if (prev.length >= maxP) return prev; return [...prev, j]; });
+  const isSel = (j) => !!selected.find(x => x.id === j.id);
 
   return (
     <div>
-      <div style={{ display: "flex", background: T.surface, borderRadius: 12, padding: 4, marginBottom: 14 }}>
-        {[["11", "⚽ Foot 11"], ["8", "⚽ Foot 8"]].map(([id, label]) => (
-          <button key={id} onClick={() => setMode(id)} style={{ flex: 1, padding: "10px 8px", borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: "pointer", border: "none", background: mode === id ? T.lime : "transparent", color: mode === id ? T.bg : T.t3 }}>{label}</button>
-        ))}
+      <div style={{ display: "flex", background: T.surface, borderRadius: 12, padding: 4, marginBottom: 14, border: "1px solid " + T.border }}>
+        {[["11", "Foot 11"], ["8", "Foot 8"]].map(function(item) {
+          var id = item[0]; var label = item[1];
+          return (
+            <button key={id} onClick={function() { setMode(id); setSelected([]); }} style={{ flex: 1, padding: "10px 8px", borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: "pointer", border: "none", background: mode === id ? T.lime : "transparent", color: mode === id ? T.bg : T.t3 }}>{label}</button>
+          );
+        })}
       </div>
-
       {mode === "11" && (
         <div style={{ display: "flex", gap: 6, marginBottom: 14, overflowX: "auto" }}>
-          {Object.keys(formations11).map(f => (
-            <button key={f} onClick={() => setFormation(f)} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: "pointer", flexShrink: 0, border: "1px solid " + (formation === f ? T.lime : T.border), background: formation === f ? T.limeBg : "transparent", color: formation === f ? T.lime : T.t3 }}>{f}</button>
-          ))}
+          {Object.keys(f11).map(function(f) {
+            return (
+              <button key={f} onClick={function() { setFormation(f); }} style={{ padding: "6px 14px", borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: "pointer", flexShrink: 0, border: "1px solid " + (formation === f ? T.lime : T.border), background: formation === f ? T.limeBg : "transparent", color: formation === f ? T.lime : T.t3 }}>{f}</button>
+            );
+          })}
         </div>
       )}
-
-      {/* Terrain SVG */}
-      <div style={{ background: T.card, borderRadius: 16, padding: 12, marginBottom: 14, border: "1px solid " + T.border }}>
+      <Card style={{ marginBottom: 14 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: T.t3 }}>{mode === "11" ? formation : "Foot à 8"}</span>
-          <span style={{ fontSize: 12, color: T.lime, fontWeight: 700 }}>{selected.length}/{maxPlayers} joueurs</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: T.t3 }}>{mode === "11" ? formation : "Foot a 8"}</span>
+          <span style={{ fontSize: 12, color: T.lime, fontWeight: 700 }}>{selected.length}/{maxP}</span>
         </div>
         <svg viewBox="0 0 300 420" style={{ width: "100%", borderRadius: 10 }}>
-          {/* Terrain */}
-          <rect width="300" height="420" fill="#1A5C32" rx="10"/>
-          <rect x="15" y="15" width="270" height="390" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" rx="6"/>
-          <line x1="15" y1="210" x2="285" y2="210" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
-          <circle cx="150" cy="210" r="40" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
-          <circle cx="150" cy="210" r="2" fill="rgba(255,255,255,0.4)"/>
-          <rect x="95" y="15" width="110" height="55" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
-          <rect x="95" y="350" width="110" height="55" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
-          <rect x="120" y="15" width="60" height="25" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
-          <rect x="120" y="380" width="60" height="25" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
-          {/* Bandes */}
-          {[70,140,210,280,350].map(y => (
-            <line key={y} x1="15" y1={y} x2="285" y2={y} stroke="rgba(255,255,255,0.04)" strokeWidth="12"/>
-          ))}
-          {/* Joueurs */}
-          {posData.map((p, i) => {
-            const j = selected[i];
-            const cx = (p.x / 100) * 270 + 15;
-            const cy = (p.y / 100) * 390 + 15;
-            const isCapt = j && capitaine === j.id;
+          <rect width="300" height="420" fill="#1A5C32" rx="10" />
+          <rect x="15" y="15" width="270" height="390" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" rx="6" />
+          <line x1="15" y1="210" x2="285" y2="210" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+          <circle cx="150" cy="210" r="40" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+          <rect x="95" y="15" width="110" height="55" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+          <rect x="95" y="350" width="110" height="55" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" />
+          {posData.map(function(p, i) {
+            var j = selected[i];
+            var cx = (p.x / 100) * 270 + 15;
+            var cy = (p.y / 100) * 390 + 15;
+            var isCapt = j && capitaine === j.id;
             return (
               <g key={i}>
-                <circle cx={cx} cy={cy} r="18" fill={j ? getAvatarColor(j.prenom) : "rgba(255,255,255,0.1)"} stroke={isCapt ? "#FFB020" : "none"} strokeWidth="2.5"/>
-                {j ? (
-                  <>
-                    <text x={cx} y={cy+1} textAnchor="middle" dominantBaseline="middle" fontSize="9" fontWeight="800" fill="#0E1820">{j.prenom[0]}{j.nom[0]}</text>
-                    {isCapt && <text x={cx+14} y={cy-14} fontSize="10">©</text>}
-                  </>
-                ) : (
-                  <text x={cx} y={cy+1} textAnchor="middle" dominantBaseline="middle" fontSize="12" fill="rgba(255,255,255,0.3)">+</text>
-                )}
-                <text x={cx} y={cy+28} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.6)" fontWeight="600">{p.pos}</text>
+                <circle cx={cx} cy={cy} r="18" fill={j ? getAvatarColor(j.prenom) : "rgba(255,255,255,0.1)"} stroke={isCapt ? "#FFB020" : "none"} strokeWidth="2.5" />
+                <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle" fontSize="9" fontWeight="800" fill="#0E1820">{j ? j.prenom[0] + j.nom[0] : "+"}</text>
+                <text x={cx} y={cy + 28} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.6)" fontWeight="600">{p.pos}</text>
               </g>
             );
           })}
         </svg>
-      </div>
-
-      {/* Sélection joueurs */}
-      <div style={{ fontSize: 11, fontWeight: 700, color: T.t3, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>
-        Sélectionner les joueurs ({selected.length}/{maxPlayers})
-      </div>
-      {loading && <div style={{ textAlign: "center", color: T.t3, padding: 20 }}>⏳ Chargement...</div>}
-      {joueurs.map(j => {
-        const sel = isSelected(j);
+      </Card>
+      <SL>Joueurs ({selected.length}/{maxP})</SL>
+      {loading && <Spinner />}
+      {joueurs.map(function(j) {
+        var sel = isSel(j);
         return (
-          <div key={j.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, marginBottom: 6, background: sel ? T.limeBg : T.card, border: "1px solid " + (sel ? T.lime + "50" : T.border), cursor: "pointer" }} onClick={() => togglePlayer(j)}>
+          <div key={j.id} onClick={function() { toggle(j); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 12, marginBottom: 6, background: sel ? T.limeBg : T.card, border: "1px solid " + (sel ? T.lime + "50" : T.border), cursor: "pointer", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
             <Avatar name={j.prenom + " " + j.nom} size={34} />
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 13, color: T.t1 }}>{j.prenom} {j.nom}</div>
               <div style={{ fontSize: 11, color: T.t3 }}>{j.poste}</div>
             </div>
-            {sel && <button onClick={evt => { evt.stopPropagation(); setCapitaine(capitaine === j.id ? null : j.id); }} style={{ padding: "4px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, border: "1px solid " + (capitaine === j.id ? T.amber : T.border), background: capitaine === j.id ? T.amberBg : "transparent", color: capitaine === j.id ? T.amber : T.t3, cursor: "pointer" }}>Cap</button>}
-            <div style={{ width: 24, height: 24, borderRadius: 6, background: sel ? T.lime : T.border, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: sel ? T.bg : T.t3, fontWeight: 700 }}>{sel ? "+" : "+"}</div>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: sel ? T.lime : T.border, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: sel ? T.bg : T.t3, fontWeight: 900 }}>{sel ? "+" : "+"}</div>
           </div>
         );
       })}
@@ -1765,4 +1717,36 @@ function Terrains() {
     setLoading(true);
     const data = await db.get("terrains?order=created_at.desc");
     setTerrains(data || []); setLoading(false);
-  }, [
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const save = async () => {
+    if (!form.nom) return;
+    const clean = { nom: form.nom, adresse: form.adresse, surface: form.surface };
+    if (form.latitude) clean.latitude = parseFloat(form.latitude);
+    if (form.longitude) clean.longitude = parseFloat(form.longitude);
+    await db.post("terrains", clean);
+    setShowAdd(false); setForm(ef); load();
+  };
+
+  const openMaps = (t, app) => {
+    const query = encodeURIComponent(t.adresse || t.nom);
+    const coords = t.latitude && t.longitude ? t.latitude + "," + t.longitude : null;
+    let url;
+    if (app === "google") url = coords ? "https://www.google.com/maps?q=" + coords : "https://www.google.com/maps/search/" + query;
+    else if (app === "waze") url = coords ? "https://waze.com/ul?ll=" + coords + "&navigate=yes" : "https://waze.com/ul?q=" + query;
+    else url = coords ? "https://maps.apple.com/?ll=" + coords : "https://maps.apple.com/?q=" + query;
+    window.open(url, "_blank");
+  };
+
+  const surfaceColor = { "Herbe naturelle": T.lime, "Synthétique": T.cyan, "Salle": T.amber };
+  const surfaceIcon = { "Herbe naturelle": "🌿", "Synthétique": "🏟️", "Salle": "🏢" };
+
+  return (
+    <div>
+      <div style={{ background: T.limeBg, border: "1px solid " + T.lime + "20", borderRadius: 12, padding: 12, marginBottom: 14, fontSize: 13, color: T.lime }}>
+        📍 Ajoutez vos terrains pour accéder rapidement à la navigation
+      </div>
+      <button style={{ width: "100%", padding: "13px", borderRadius: 14, background: T.lime, color: T.bg, fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer", marginBottom: 16 }} onClick={() => { setForm(ef); setShowAdd(true); }}>+ Ajouter un terrain</button>
+      {confirmDel && <Confirm msg="Supprimer ce terrain ?" onOk={async () => { await db.del("terrains", confirmDel); setConfirmDel(null); load(); }} onCance
