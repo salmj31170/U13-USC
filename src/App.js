@@ -333,7 +333,7 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg,#003B7A 0%,#1565C0 50%,#F0F4F8 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <style>{globalStyles}</style>
 
       {/* Logo */}
@@ -345,8 +345,8 @@ function Login({ onLogin }) {
           fontSize: 36, margin: "0 auto 16px",
           boxShadow: `0 8px 32px ${T.lime}30`
         }}>⚽</div>
-        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 26, fontWeight: 700, color: T.t1, letterSpacing: -0.5 }}>U13 Team Manager</div>
-        <div style={{ fontSize: 13, color: T.t3, marginTop: 4 }}>Saison 2025 — 2026</div>
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 26, fontWeight: 700, color: T.t1, letterSpacing: -0.5 }}>U13-USC</div>
+        <div style={{ fontSize: 13, color: T.t3, marginTop: 4 }}>USC Colomiers · U13</div>
       </div>
 
       <div style={{ width: "100%", maxWidth: 380 }}>
@@ -409,7 +409,7 @@ function Dashboard({ joueurs, events }) {
         {/* Pitch lines decoration */}
         <div style={{ position: "absolute", right: -20, top: -20, width: 120, height: 120, border: `2px solid ${T.lime}18`, borderRadius: "50%" }} />
         <div style={{ position: "absolute", right: 20, top: 20, width: 60, height: 60, border: `1px solid ${T.lime}10`, borderRadius: "50%" }} />
-        <div style={{ fontSize: 11, fontWeight: 700, color: T.lime, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>🏆 Saison 2025–2026</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: T.lime, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 14 }}>🔵 Saison 2025–2026</div>
         <div style={{ display: "flex", gap: 0 }}>
           {[
             { v: dispo.length, l: "Disponibles", c: T.lime },
@@ -1764,7 +1764,4 @@ function Compositions() {
             )}
             <div style={{ width: 24, height: 24, borderRadius: 6, background: sel ? T.lime : T.border, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: sel ? T.bg : T.t3, fontWeight: 700 }}>
               {sel ? "✓" : "+"}
-            </div>
-          </div>
-        );
-      })
+      
