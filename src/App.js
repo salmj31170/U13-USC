@@ -928,7 +928,7 @@ function Convocations() {
         </div>
         {convocs.length > 0 && (
           <button onClick={supprimerToutesConvocs} style={{ marginTop: 12, width: "100%", padding: "8px", borderRadius: 10, background: T.redBg, border: "1px solid " + T.red + "30", color: T.red, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-            🗑️ Supprimer toutes les convocations de ce match
+            Supprimer toutes les convocations
           </button>
         )}
       </Card>
@@ -1776,4 +1776,5 @@ function Terrains() {
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
             <div style={{ width: 46, height: 46, borderRadius: 13, background: (sC[t.surface] || T.lime) + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>
               {"📍"}
-            </div
+            </div>
+            <d
