@@ -84,17 +84,7 @@ const avatarPalette = [T.lime, T.cyan, T.red, T.amber, T.purple, "#FF6B6B", "#4E
 const getAvatarColor = (s) => avatarPalette[(s?.charCodeAt(0) || 0) % avatarPalette.length];
 
 // ─── MICRO COMPONENTS ─────────────────────────────────────────────────────────
-const css = String.raw;
-
-const globalStyles = css"
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
-  *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-  body { background: ${T.bg}; color: ${T.t1}; font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; }
-  input, button, select, textarea { font-family: inherit; }
-  input[type="date"], input[type="time"] { color-scheme: dark; }
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: ${T.surface}; }
-  ::-webkit-scrollbar-thumb { background: " + T.border + "; border-radius: 2px; }
+ border-radius: 2px; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
   @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
   @keyframes fadeIn { from{opacity:0} to{opacity:1} }
@@ -107,7 +97,7 @@ const Avatar = ({ name = "", size = 40, style }) => {
   return (
     <div style={{
       width: size, height: size, borderRadius: size * 0.28,
-      background: "linear-gradient(135deg, ${bg}, " + bg + "88)",
+      background: "linear-gradient(135deg," + bg + "," + bg + "88)",
       display: "flex", alignItems: "center", justifyContent: "center",
       fontSize: size * 0.36, fontWeight: 800, color: T.bg,
       flexShrink: 0, letterSpacing: -0.5, ...style
@@ -1759,4 +1749,20 @@ function Compositions() {
               <div style={{ fontWeight: 700, fontSize: 13, color: T.t1 }}>{j.prenom} {j.nom}</div>
               <div style={{ fontSize: 11, color: T.t3 }}>{j.poste}</div>
             </div>
-            {sel ? <button onClick={evt => { evt.stopPropagation(); setCapitaine(capitaine === j.id ? null : j.id); }} style={{ padding: "4px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, border: "1px solid " + (capitaine === j.id ? T.amber : T.border), background: capitaine === j.id ? T.amberBg : "transparent", color: 
+            {sel ? <button onClick={evt => { evt.stopPropagation(); setCapitaine(capitaine === j.id ? null : j.id); }} style={{ padding: "4px 8px", borderRadius: 8, fontSize: 11, fontWeight: 700, border: "1px solid " + (capitaine === j.id ? T.amber : T.border), background: capitaine === j.id ? T.amberBg : "transparent", color: capitaine === j.id ? T.amber : T.t3, cursor: "pointer" }}>{"Cap"}</button> : null}
+            <div style={{ width: 24, height: 24, borderRadius: 6, background: sel ? T.lime : T.border, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: sel ? T.bg : T.t3, fontWeight: 700 }}>{sel ? "+" : "+"}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
+// ─── TERRAINS ─────────────────────────────────────────────────────────────────
+function Terrains() {
+  const [terrains, setTerrains] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(null);
+  const ef = 
